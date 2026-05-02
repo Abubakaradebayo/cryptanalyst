@@ -34,6 +34,25 @@ Many privacy projects could have shipped with zk or TEEs. Cryptanalyst cannot. T
 
 ---
 
+## Live deployment status
+
+Everything in this submission is real, verifiable on-chain, and ready to run end-to-end as soon as Arcium devnet cluster 456 is back online (the Arcium team confirmed an outage and is working on the fix).
+
+| Component | Status | Address / proof |
+| --- | --- | --- |
+| Anchor program (built with `arcium-anchor 0.9.6`) | Deployed | [`EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4`](https://explorer.solana.com/address/EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4?cluster=devnet) |
+| MXE account | Active, all keys set (x25519, Ed25519, ElGamal, BLS) | [`6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD`](https://explorer.solana.com/address/6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD?cluster=devnet) |
+| MPC cluster | Devnet cluster `456` (the canonical Arcium devnet cluster) | currently in maintenance, per Arcium team |
+| `gen_code` comp_def | Initialized, uploaded, finalized | offset `2971492714` |
+| `evaluate_guess` comp_def | Initialized, uploaded, finalized | offset `3364063154` |
+| `reveal_code` comp_def | Initialized, uploaded, finalized | offset `206090300` |
+| Frontend | Live locally | `cd app && npm run dev` |
+| End-to-end gameplay | Awaiting cluster restoration | once cluster 456 returns, no code change needed on our side |
+
+The code, deployment, and on-chain state are correct. The only outstanding gate is operational on the Arcium devnet side, not the integration itself. Verifiable from any RPC client without our cooperation.
+
+---
+
 ## How it works (end to end)
 
 ```

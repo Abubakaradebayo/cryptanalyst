@@ -4,8 +4,8 @@ use arcium_client::idl::arcium::types::CallbackAccount;
 
 declare_id!("EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4");
 
-const COMP_DEF_OFFSET_GEN_CODE: u32 = comp_def_offset("gen_code");
-const COMP_DEF_OFFSET_EVALUATE_GUESS: u32 = comp_def_offset("evaluate_guess");
+const COMP_DEF_OFFSET_GEN_CODE_V2: u32 = comp_def_offset("gen_code_v2");
+const COMP_DEF_OFFSET_EVALUATE_GUESS_V2: u32 = comp_def_offset("evaluate_guess_v2");
 const COMP_DEF_OFFSET_REVEAL_CODE: u32 = comp_def_offset("reveal_code");
 
 // DailyPuzzle layout offsets (after 8-byte discriminator):
@@ -34,12 +34,12 @@ pub enum PuzzleState {
 pub mod cryptanalyst {
     use super::*;
 
-    pub fn init_gen_code_comp_def(ctx: Context<InitGenCodeCompDef>) -> Result<()> {
+    pub fn init_gen_code_v2_comp_def(ctx: Context<InitGenCodeV2CompDef>) -> Result<()> {
         init_comp_def(ctx.accounts, None, None)?;
         Ok(())
     }
 
-    pub fn init_evaluate_guess_comp_def(ctx: Context<InitEvaluateGuessCompDef>) -> Result<()> {
+    pub fn init_evaluate_guess_v2_comp_def(ctx: Context<InitEvaluateGuessV2CompDef>) -> Result<()> {
         init_comp_def(ctx.accounts, None, None)?;
         Ok(())
     }
@@ -79,7 +79,7 @@ pub mod cryptanalyst {
             ctx.accounts,
             computation_offset,
             args,
-            vec![GenCodeCallback::callback_ix(
+            vec![GenCodeV2Callback::callback_ix(
                 computation_offset,
                 &ctx.accounts.mxe_account,
                 &[CallbackAccount {
@@ -94,16 +94,16 @@ pub mod cryptanalyst {
         Ok(())
     }
 
-    #[arcium_callback(encrypted_ix = "gen_code")]
-    pub fn gen_code_callback(
-        ctx: Context<GenCodeCallback>,
-        output: SignedComputationOutputs<GenCodeOutput>,
+    #[arcium_callback(encrypted_ix = "gen_code_v2")]
+    pub fn gen_code_v2_callback(
+        ctx: Context<GenCodeV2Callback>,
+        output: SignedComputationOutputs<GenCodeV2Output>,
     ) -> Result<()> {
         let o = match output.verify_output(
             &ctx.accounts.cluster_account,
             &ctx.accounts.computation_account,
         ) {
-            Ok(GenCodeOutput { field_0 }) => field_0,
+            Ok(GenCodeV2Output { field_0 }) => field_0,
             Err(_) => return Err(ErrorCode::AbortedComputation.into()),
         };
 
@@ -170,7 +170,7 @@ pub mod cryptanalyst {
             ctx.accounts,
             computation_offset,
             args,
-            vec![EvaluateGuessCallback::callback_ix(
+            vec![EvaluateGuessV2Callback::callback_ix(
                 computation_offset,
                 &ctx.accounts.mxe_account,
                 &[
@@ -191,16 +191,16 @@ pub mod cryptanalyst {
         Ok(())
     }
 
-    #[arcium_callback(encrypted_ix = "evaluate_guess")]
-    pub fn evaluate_guess_callback(
-        ctx: Context<EvaluateGuessCallback>,
-        output: SignedComputationOutputs<EvaluateGuessOutput>,
+    #[arcium_callback(encrypted_ix = "evaluate_guess_v2")]
+    pub fn evaluate_guess_v2_callback(
+        ctx: Context<EvaluateGuessV2Callback>,
+        output: SignedComputationOutputs<EvaluateGuessV2Output>,
     ) -> Result<()> {
         let o = match output.verify_output(
             &ctx.accounts.cluster_account,
             &ctx.accounts.computation_account,
         ) {
-            Ok(EvaluateGuessOutput { field_0 }) => field_0,
+            Ok(EvaluateGuessV2Output { field_0 }) => field_0,
             Err(_) => return Err(ErrorCode::AbortedComputation.into()),
         };
 
@@ -331,9 +331,9 @@ pub mod cryptanalyst {
     }
 }
 
-#[init_computation_definition_accounts("gen_code", payer)]
+#[init_computation_definition_accounts("gen_code_v2", payer)]
 #[derive(Accounts)]
-pub struct InitGenCodeCompDef<'info> {
+pub struct InitGenCodeV2CompDef<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(mut, address = derive_mxe_pda!())]
@@ -351,9 +351,9 @@ pub struct InitGenCodeCompDef<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[init_computation_definition_accounts("evaluate_guess", payer)]
+#[init_computation_definition_accounts("evaluate_guess_v2", payer)]
 #[derive(Accounts)]
-pub struct InitEvaluateGuessCompDef<'info> {
+pub struct InitEvaluateGuessV2CompDef<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(mut, address = derive_mxe_pda!())]
@@ -391,7 +391,7 @@ pub struct InitRevealCodeCompDef<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[queue_computation_accounts("gen_code", payer)]
+#[queue_computation_accounts("gen_code_v2", payer)]
 #[derive(Accounts)]
 #[instruction(computation_offset: u64, date: u32)]
 pub struct InitDailyPuzzle<'info> {
@@ -425,7 +425,7 @@ pub struct InitDailyPuzzle<'info> {
     #[account(mut, address = derive_comp_pda!(computation_offset, mxe_account, ErrorCode::ClusterNotSet))]
     /// CHECK: computation_account, checked by arcium program.
     pub computation_account: UncheckedAccount<'info>,
-    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_GEN_CODE))]
+    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_GEN_CODE_V2))]
     pub comp_def_account: Box<Account<'info, ComputationDefinitionAccount>>,
     #[account(mut, address = derive_cluster_pda!(mxe_account, ErrorCode::ClusterNotSet))]
     pub cluster_account: Box<Account<'info, Cluster>>,
@@ -437,11 +437,11 @@ pub struct InitDailyPuzzle<'info> {
     pub arcium_program: Program<'info, Arcium>,
 }
 
-#[callback_accounts("gen_code")]
+#[callback_accounts("gen_code_v2")]
 #[derive(Accounts)]
-pub struct GenCodeCallback<'info> {
+pub struct GenCodeV2Callback<'info> {
     pub arcium_program: Program<'info, Arcium>,
-    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_GEN_CODE))]
+    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_GEN_CODE_V2))]
     pub comp_def_account: Box<Account<'info, ComputationDefinitionAccount>>,
     #[account(address = derive_mxe_pda!())]
     pub mxe_account: Box<Account<'info, MXEAccount>>,
@@ -456,7 +456,7 @@ pub struct GenCodeCallback<'info> {
     pub puzzle: Box<Account<'info, DailyPuzzle>>,
 }
 
-#[queue_computation_accounts("evaluate_guess", player)]
+#[queue_computation_accounts("evaluate_guess_v2", player)]
 #[derive(Accounts)]
 #[instruction(computation_offset: u64, date: u32, attempt_idx: u32)]
 pub struct SubmitGuess<'info> {
@@ -501,7 +501,7 @@ pub struct SubmitGuess<'info> {
     #[account(mut, address = derive_comp_pda!(computation_offset, mxe_account, ErrorCode::ClusterNotSet))]
     /// CHECK: computation_account, checked by arcium program.
     pub computation_account: UncheckedAccount<'info>,
-    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_EVALUATE_GUESS))]
+    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_EVALUATE_GUESS_V2))]
     pub comp_def_account: Box<Account<'info, ComputationDefinitionAccount>>,
     #[account(mut, address = derive_cluster_pda!(mxe_account, ErrorCode::ClusterNotSet))]
     pub cluster_account: Box<Account<'info, Cluster>>,
@@ -513,11 +513,11 @@ pub struct SubmitGuess<'info> {
     pub arcium_program: Program<'info, Arcium>,
 }
 
-#[callback_accounts("evaluate_guess")]
+#[callback_accounts("evaluate_guess_v2")]
 #[derive(Accounts)]
-pub struct EvaluateGuessCallback<'info> {
+pub struct EvaluateGuessV2Callback<'info> {
     pub arcium_program: Program<'info, Arcium>,
-    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_EVALUATE_GUESS))]
+    #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_EVALUATE_GUESS_V2))]
     pub comp_def_account: Box<Account<'info, ComputationDefinitionAccount>>,
     #[account(address = derive_mxe_pda!())]
     pub mxe_account: Box<Account<'info, MXEAccount>>,

@@ -27,7 +27,7 @@ function randomBn8(): BN {
   return new BN(Buffer.from(buf), "hex");
 }
 
-function arciumAccounts(circuit: "gen_code" | "evaluate_guess" | "reveal_code", offset: BN) {
+function arciumAccounts(circuit: "gen_code_v2" | "evaluate_guess_v2" | "reveal_code", offset: BN) {
   return {
     computationAccount: getComputationAccAddress(ARCIUM_CLUSTER_OFFSET, offset),
     clusterAccount: getClusterAccAddress(ARCIUM_CLUSTER_OFFSET),
@@ -58,7 +58,7 @@ export function useGameActions(date: number) {
         .accountsPartial({
           payer: publicKey,
           puzzle: dailyPuzzlePda(date),
-          ...arciumAccounts("gen_code", offset),
+          ...arciumAccounts("gen_code_v2", offset),
         })
         .rpc({ skipPreflight: false, commitment: "confirmed" });
       return sig;
@@ -105,7 +105,7 @@ export function useGameActions(date: number) {
           player: publicKey,
           puzzle: dailyPuzzlePda(date),
           attempt: playerAttemptPda(date, publicKey, nextAttemptIdx),
-          ...arciumAccounts("evaluate_guess", offset),
+          ...arciumAccounts("evaluate_guess_v2", offset),
         })
         .rpc({ skipPreflight: false, commitment: "confirmed" });
       return sig;

@@ -220,16 +220,16 @@ export type Cryptanalyst = {
       ]
     },
     {
-      "name": "evaluateGuessCallback",
+      "name": "evaluateGuessV2Callback",
       "discriminator": [
-        63,
-        51,
-        78,
-        233,
-        217,
-        125,
-        238,
-        122
+        159,
+        18,
+        126,
+        196,
+        94,
+        200,
+        80,
+        195
       ],
       "accounts": [
         {
@@ -272,7 +272,7 @@ export type Cryptanalyst = {
                   "kind": "type",
                   "type": {
                     "defined": {
-                      "name": "evaluateGuessOutput"
+                      "name": "evaluateGuessV2Output"
                     }
                   }
                 }
@@ -283,16 +283,16 @@ export type Cryptanalyst = {
       ]
     },
     {
-      "name": "genCodeCallback",
+      "name": "genCodeV2Callback",
       "discriminator": [
-        197,
-        247,
-        147,
-        198,
+        145,
+        253,
         19,
-        1,
-        107,
-        94
+        155,
+        114,
+        99,
+        120,
+        191
       ],
       "accounts": [
         {
@@ -331,7 +331,7 @@ export type Cryptanalyst = {
                   "kind": "type",
                   "type": {
                     "defined": {
-                      "name": "genCodeOutput"
+                      "name": "genCodeV2Output"
                     }
                   }
                 }
@@ -467,16 +467,16 @@ export type Cryptanalyst = {
       ]
     },
     {
-      "name": "initEvaluateGuessCompDef",
+      "name": "initEvaluateGuessV2CompDef",
       "discriminator": [
-        133,
-        228,
-        28,
-        33,
-        117,
-        33,
-        133,
-        86
+        107,
+        17,
+        167,
+        116,
+        177,
+        8,
+        31,
+        240
       ],
       "accounts": [
         {
@@ -512,16 +512,16 @@ export type Cryptanalyst = {
       "args": []
     },
     {
-      "name": "initGenCodeCompDef",
+      "name": "initGenCodeV2CompDef",
       "discriminator": [
-        127,
-        45,
+        31,
+        23,
+        103,
+        184,
+        188,
+        22,
         206,
-        147,
-        183,
-        14,
-        121,
-        78
+        107
       ],
       "accounts": [
         {
@@ -1509,7 +1509,7 @@ export type Cryptanalyst = {
       }
     },
     {
-      "name": "evaluateGuessOutput",
+      "name": "evaluateGuessV2Output",
       "docs": [
         "The output of the callback instruction. Provided as a struct with ordered fields",
         "as anchor does not support tuples and tuple structs yet."
@@ -1521,7 +1521,7 @@ export type Cryptanalyst = {
             "name": "field0",
             "type": {
               "defined": {
-                "name": "evaluateGuessOutputStruct0"
+                "name": "evaluateGuessV2OutputStruct0"
               }
             }
           }
@@ -1529,7 +1529,7 @@ export type Cryptanalyst = {
       }
     },
     {
-      "name": "evaluateGuessOutputStruct0",
+      "name": "evaluateGuessV2OutputStruct0",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1557,7 +1557,7 @@ export type Cryptanalyst = {
       }
     },
     {
-      "name": "genCodeOutput",
+      "name": "genCodeV2Output",
       "docs": [
         "The output of the callback instruction. Provided as a struct with ordered fields",
         "as anchor does not support tuples and tuple structs yet."

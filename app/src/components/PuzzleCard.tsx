@@ -4,13 +4,19 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { StatusBadge } from "./StatusBadge";
 import { FlowerMark } from "./FlowerMark";
 import { LoadingFlower } from "./LoadingFlower";
+import { ColorSymbol } from "./ColorSymbol";
 import { formatPuzzleDate } from "@/lib/dates";
+import { NUM_POSITIONS } from "@/lib/constants";
 
 interface Props {
   date: number;
   state: "Loading" | "NotInitialized" | "Generating" | "Active" | "Solved";
   attemptCount: number;
   solvedCount: number;
+  best: { exact: number; misplaced: number } | null;
+  revealedSymbols: number[] | null;
+  exhausted: boolean;
+  attemptsLeft: number;
   onPrimaryAction?: () => void;
   primaryDisabled?: boolean;
   primaryLabel?: string;
@@ -21,6 +27,10 @@ export function PuzzleCard({
   state,
   attemptCount,
   solvedCount,
+  best,
+  revealedSymbols,
+  exhausted,
+  attemptsLeft,
   onPrimaryAction,
   primaryDisabled,
   primaryLabel,
@@ -31,7 +41,11 @@ export function PuzzleCard({
     state === "Solved" ? (
       <StatusBadge variant="solved">Solved</StatusBadge>
     ) : state === "Active" ? (
-      <StatusBadge variant="active">Active</StatusBadge>
+      exhausted ? (
+        <StatusBadge variant="mute">Out of guesses</StatusBadge>
+      ) : (
+        <StatusBadge variant="active">Active</StatusBadge>
+      )
     ) : state === "Generating" ? (
       <StatusBadge variant="computing">Generating · MPC</StatusBadge>
     ) : state === "NotInitialized" ? (
@@ -41,6 +55,14 @@ export function PuzzleCard({
     );
 
   const isComputing = state === "Generating" || state === "Loading";
+
+  // Determine what to show in the 4 code slots:
+  //   - Solved -> revealed answer colors
+  //   - otherwise -> "?" placeholders (the code is encrypted on chain)
+  const slots: (number | null)[] =
+    revealedSymbols && revealedSymbols.length === NUM_POSITIONS
+      ? revealedSymbols
+      : Array.from({ length: NUM_POSITIONS }, () => null);
 
   return (
     <div className="panel p-6 flex flex-col" style={{ minHeight: 580 }}>
@@ -54,33 +76,94 @@ export function PuzzleCard({
         Daily Cipher
       </h2>
       <p className="text-text-mute text-[13px] mb-5 max-w-[36ch] leading-relaxed">
-        Crack today&apos;s 4-symbol code. Generated inside the Arcium MPC cluster. Nobody knows the answer until someone solves it.
+        Crack today&apos;s 4-symbol code. Generated inside the Arcium MPC
+        cluster. Nobody knows the answer until someone solves it.
       </p>
 
-      <div className="relative panel-2 dotted-bg flex-1 mb-5 overflow-hidden flex items-center justify-center" style={{ minHeight: 220 }}>
-        <CiphertextMosaic />
+      <div
+        className="relative panel-2 dotted-bg flex-1 mb-5 overflow-hidden flex flex-col items-center justify-center gap-5"
+        style={{ minHeight: 220 }}
+      >
+        <div className="absolute top-3 left-3 flex items-center gap-2">
+          <FlowerMark size={12} />
+          <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
+            today&apos;s code
+          </span>
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          {slots.map((sym, i) =>
+            sym !== null ? (
+              <ColorSymbol key={i} index={sym} size={48} />
+            ) : (
+              <div
+                key={i}
+                className="flex items-center justify-center font-mono text-[20px] text-accent-soft"
+                style={{
+                  width: 48,
+                  height: 48,
+                  border: "1px dashed var(--line-accent)",
+                  background: "rgba(167,139,250,0.04)",
+                }}
+              >
+                ?
+              </div>
+            ),
+          )}
+        </div>
+
+        {state === "Solved" ? (
+          <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-green">
+            Revealed by the cluster
+          </div>
+        ) : exhausted ? (
+          <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute text-center">
+            Out of guesses
+            {best ? (
+              <span className="block text-text-dim mt-1">
+                closest: {best.exact}E · {best.misplaced}M
+              </span>
+            ) : null}
+          </div>
+        ) : best ? (
+          <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-soft">
+            best: {best.exact}E · {best.misplaced}M
+            <span className="text-text-dim ml-2">
+              · {attemptsLeft} left
+            </span>
+          </div>
+        ) : (
+          <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-dim">
+            sealed in the MPC cluster
+          </div>
+        )}
+
         {isComputing ? (
-          <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]" style={{ background: "rgba(0,0,0,0.55)" }}>
+          <div
+            className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]"
+            style={{ background: "rgba(0,0,0,0.55)" }}
+          >
             <LoadingFlower
               size={56}
               mode="bloom"
-              label={state === "Generating" ? "MPC cluster generating" : "Reading state"}
-              sublabel={state === "Generating" ? "Distributed randomness · ~10-30s" : undefined}
+              label={
+                state === "Generating" ? "MPC cluster generating" : "Reading state"
+              }
+              sublabel={
+                state === "Generating"
+                  ? "Distributed randomness · ~10-30s"
+                  : undefined
+              }
             />
           </div>
         ) : null}
+
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
           <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
             day · {date}
           </span>
           <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
             {formatPuzzleDate(date)}
-          </span>
-        </div>
-        <div className="absolute top-3 left-3 flex items-center gap-2">
-          <FlowerMark size={12} />
-          <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
-            encrypted state
           </span>
         </div>
       </div>
@@ -109,28 +192,6 @@ export function PuzzleCard({
           <WalletMultiButton style={{ width: "100%", justifyContent: "center" }} />
         </div>
       )}
-    </div>
-  );
-}
-
-function CiphertextMosaic() {
-  const cells = Array.from({ length: 64 }, (_, i) => {
-    const hue = (i * 37) % 360;
-    const op = ((i * 13) % 9) / 60 + 0.05;
-    return { hue, op };
-  });
-  return (
-    <div className="grid grid-cols-8 gap-0.5 p-6 w-full">
-      {cells.map((c, i) => (
-        <div
-          key={i}
-          style={{
-            aspectRatio: "1 / 1",
-            background: `hsl(${260 + ((i * 11) % 40)} 70% 60% / ${c.op})`,
-            border: "1px solid rgba(255,255,255,0.04)",
-          }}
-        />
-      ))}
     </div>
   );
 }

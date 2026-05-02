@@ -39,11 +39,11 @@ async function sleep(ms: number) {
   const baseSeed = getArciumAccountBaseSeed("ComputationDefinitionAccount");
 
   const circuits: {
-    name: "gen_code" | "evaluate_guess" | "reveal_code";
-    method: "initGenCodeCompDef" | "initEvaluateGuessCompDef" | "initRevealCodeCompDef";
+    name: "gen_code_v2" | "evaluate_guess_v2" | "reveal_code";
+    method: "initGenCodeV2CompDef" | "initEvaluateGuessV2CompDef" | "initRevealCodeCompDef";
   }[] = [
-    { name: "gen_code", method: "initGenCodeCompDef" },
-    { name: "evaluate_guess", method: "initEvaluateGuessCompDef" },
+    { name: "gen_code_v2", method: "initGenCodeV2CompDef" },
+    { name: "evaluate_guess_v2", method: "initEvaluateGuessV2CompDef" },
     { name: "reveal_code", method: "initRevealCodeCompDef" },
   ];
 

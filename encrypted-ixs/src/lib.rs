@@ -6,8 +6,6 @@ mod circuits {
 
     pub const NUM_POSITIONS: usize = 4;
     pub const NUM_SYMBOLS: usize = 6;
-    pub const MAX_SYMBOL: u128 = 5;
-    pub const RNG_ATTEMPTS: usize = 24;
 
     pub struct DailyCode {
         pub symbols: [u8; NUM_POSITIONS],
@@ -23,24 +21,29 @@ mod circuits {
     }
 
     #[instruction]
-    pub fn gen_code() -> Enc<Mxe, DailyCode> {
-        let (s0, _) = ArcisRNG::gen_integer_in_range(0, MAX_SYMBOL, RNG_ATTEMPTS);
-        let (s1, _) = ArcisRNG::gen_integer_in_range(0, MAX_SYMBOL, RNG_ATTEMPTS);
-        let (s2, _) = ArcisRNG::gen_integer_in_range(0, MAX_SYMBOL, RNG_ATTEMPTS);
-        let (s3, _) = ArcisRNG::gen_integer_in_range(0, MAX_SYMBOL, RNG_ATTEMPTS);
-        let code = DailyCode {
-            symbols: [s0 as u8, s1 as u8, s2 as u8, s3 as u8],
-        };
+    pub fn gen_code_v2() -> Enc<Mxe, DailyCode> {
+        // Simpler form: gen_uniform<u8>() avoids u128 -> u8 cast and the
+        // rejection-sampling loop that bloats bytecode. Small modulo bias
+        // (256 mod 6 != 0) is acceptable for a daily puzzle.
+        let s0 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
+        let s1 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
+        let s2 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
+        let s3 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
+        let code = DailyCode { symbols: [s0, s1, s2, s3] };
         Mxe::get().from_arcis(code)
     }
 
     #[instruction]
-    pub fn evaluate_guess(
+    pub fn evaluate_guess_v2(
         guess_ctxt: Enc<Shared, GuessInput>,
         code_ctxt: Enc<Mxe, DailyCode>,
     ) -> Feedback {
         let guess = guess_ctxt.to_arcis();
         let code = code_ctxt.to_arcis();
+
+        // Use a u8 array indexed by usize. Avoids the usize -> u8 cast
+        // that the old version had on color_idx.
+        let colors: [u8; NUM_SYMBOLS] = [0u8, 1u8, 2u8, 3u8, 4u8, 5u8];
 
         let mut exact: u8 = 0;
         for i in 0..NUM_POSITIONS {
@@ -49,7 +52,7 @@ mod circuits {
 
         let mut total: u8 = 0;
         for color_idx in 0..NUM_SYMBOLS {
-            let color: u8 = color_idx as u8;
+            let color = colors[color_idx];
             let mut g_count: u8 = 0;
             let mut c_count: u8 = 0;
             for i in 0..NUM_POSITIONS {

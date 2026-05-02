@@ -120,7 +120,11 @@ export default function Page() {
       attempts.length < MAX_ATTEMPTS
     ) {
       const symbols = pendingSymbols.map((s) => s as number);
-      const nextIdx = puzzle.attemptCount;
+      // Use max of the on-chain counter and the count of fetched attempt PDAs.
+      // attemptCount only increments on successful callback; if a callback
+      // failed, the PDA still exists at the original index, so we must use
+      // attempts.length to skip past it.
+      const nextIdx = Math.max(puzzle.attemptCount, attempts.length);
       const updated: LocalMemory = { ...localMem, [nextIdx]: symbols };
       setLocalMem(updated);
       saveLocalGuesses(date, ownerKey, updated);
@@ -132,9 +136,23 @@ export default function Page() {
   }
 
   const allSlotsFilled = pendingSymbols.every((s) => s !== null);
+  const exhausted = attempts.length >= MAX_ATTEMPTS && puzzle.state !== "Solved";
+  const attemptsLeft = Math.max(0, MAX_ATTEMPTS - attempts.length);
+
+  const best = attempts
+    .filter((a) => a.finalized)
+    .reduce<{ exact: number; misplaced: number } | null>((acc, a) => {
+      if (!acc) return { exact: a.exact, misplaced: a.misplaced };
+      if (a.exact > acc.exact || (a.exact === acc.exact && a.misplaced > acc.misplaced)) {
+        return { exact: a.exact, misplaced: a.misplaced };
+      }
+      return acc;
+    }, null);
+
   const primaryDisabled =
     pending !== "none" ||
     computingTx ||
+    exhausted ||
     (puzzle.state === "Active" && !allSlotsFilled);
 
   const primaryLabel =
@@ -146,9 +164,11 @@ export default function Page() {
           ? "Generating in cluster…"
           : puzzle.state === "Solved"
             ? "Already solved"
-            : computingTx || pending === "guess"
-              ? "Computing in MPC…"
-              : "Submit guess";
+            : exhausted
+              ? "Out of guesses · try tomorrow"
+              : computingTx || pending === "guess"
+                ? "Computing in MPC…"
+                : "Submit guess";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -161,6 +181,10 @@ export default function Page() {
             state={puzzle.state}
             attemptCount={puzzle.attemptCount}
             solvedCount={puzzle.solvedCount}
+            best={best}
+            revealedSymbols={null}
+            exhausted={exhausted}
+            attemptsLeft={attemptsLeft}
             onPrimaryAction={onPrimary}
             primaryDisabled={primaryDisabled}
             primaryLabel={primaryLabel}

@@ -214,16 +214,16 @@
       ]
     },
     {
-      "name": "evaluate_guess_callback",
+      "name": "evaluate_guess_v2_callback",
       "discriminator": [
-        63,
-        51,
-        78,
-        233,
-        217,
-        125,
-        238,
-        122
+        159,
+        18,
+        126,
+        196,
+        94,
+        200,
+        80,
+        195
       ],
       "accounts": [
         {
@@ -266,7 +266,7 @@
                   "kind": "type",
                   "type": {
                     "defined": {
-                      "name": "EvaluateGuessOutput"
+                      "name": "EvaluateGuessV2Output"
                     }
                   }
                 }
@@ -277,16 +277,16 @@
       ]
     },
     {
-      "name": "gen_code_callback",
+      "name": "gen_code_v2_callback",
       "discriminator": [
-        197,
-        247,
-        147,
-        198,
+        145,
+        253,
         19,
-        1,
-        107,
-        94
+        155,
+        114,
+        99,
+        120,
+        191
       ],
       "accounts": [
         {
@@ -325,7 +325,7 @@
                   "kind": "type",
                   "type": {
                     "defined": {
-                      "name": "GenCodeOutput"
+                      "name": "GenCodeV2Output"
                     }
                   }
                 }
@@ -461,16 +461,16 @@
       ]
     },
     {
-      "name": "init_evaluate_guess_comp_def",
+      "name": "init_evaluate_guess_v2_comp_def",
       "discriminator": [
-        133,
-        228,
-        28,
-        33,
-        117,
-        33,
-        133,
-        86
+        107,
+        17,
+        167,
+        116,
+        177,
+        8,
+        31,
+        240
       ],
       "accounts": [
         {
@@ -506,16 +506,16 @@
       "args": []
     },
     {
-      "name": "init_gen_code_comp_def",
+      "name": "init_gen_code_v2_comp_def",
       "discriminator": [
-        127,
-        45,
+        31,
+        23,
+        103,
+        184,
+        188,
+        22,
         206,
-        147,
-        183,
-        14,
-        121,
-        78
+        107
       ],
       "accounts": [
         {
@@ -1503,7 +1503,7 @@
       }
     },
     {
-      "name": "EvaluateGuessOutput",
+      "name": "EvaluateGuessV2Output",
       "docs": [
         "The output of the callback instruction. Provided as a struct with ordered fields",
         "as anchor does not support tuples and tuple structs yet."
@@ -1515,7 +1515,7 @@
             "name": "field_0",
             "type": {
               "defined": {
-                "name": "EvaluateGuessOutputStruct0"
+                "name": "EvaluateGuessV2OutputStruct0"
               }
             }
           }
@@ -1523,7 +1523,7 @@
       }
     },
     {
-      "name": "EvaluateGuessOutputStruct0",
+      "name": "EvaluateGuessV2OutputStruct0",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1551,7 +1551,7 @@
       }
     },
     {
-      "name": "GenCodeOutput",
+      "name": "GenCodeV2Output",
       "docs": [
         "The output of the callback instruction. Provided as a struct with ordered fields",
         "as anchor does not support tuples and tuple structs yet."
