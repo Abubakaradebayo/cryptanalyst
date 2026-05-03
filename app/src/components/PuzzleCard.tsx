@@ -5,6 +5,7 @@ import { StatusBadge } from "./StatusBadge";
 import { FlowerMark } from "./FlowerMark";
 import { LoadingFlower } from "./LoadingFlower";
 import { ColorSymbol } from "./ColorSymbol";
+import { ClientOnly } from "./ClientOnly";
 import { formatPuzzleDate } from "@/lib/dates";
 import { NUM_POSITIONS } from "@/lib/constants";
 
@@ -179,19 +180,30 @@ export function PuzzleCard({
         </div>
       </div>
 
-      {connected ? (
-        <button
-          className="btn-primary w-full justify-center"
-          onClick={onPrimaryAction}
-          disabled={primaryDisabled}
-        >
-          {primaryLabel ?? "Submit guess"} <span aria-hidden>→</span>
-        </button>
-      ) : (
-        <div className="w-full">
-          <WalletMultiButton style={{ width: "100%", justifyContent: "center" }} />
-        </div>
-      )}
+      <ClientOnly
+        fallback={
+          <button
+            className="btn-primary w-full justify-center"
+            disabled
+          >
+            Loading… <span aria-hidden>→</span>
+          </button>
+        }
+      >
+        {connected ? (
+          <button
+            className="btn-primary w-full justify-center"
+            onClick={onPrimaryAction}
+            disabled={primaryDisabled}
+          >
+            {primaryLabel ?? "Submit guess"} <span aria-hidden>→</span>
+          </button>
+        ) : (
+          <div className="w-full">
+            <WalletMultiButton style={{ width: "100%", justifyContent: "center" }} />
+          </div>
+        )}
+      </ClientOnly>
     </div>
   );
 }

@@ -47,6 +47,7 @@ Arcium RTG **Hidden-Information Games** challenge.
 | `EvaluateGuessV2Callback` (BLS-signed feedback) | `5ZCgEZXpv1v214cPSm5ovuMJyebo4S54xM3kS9JAtrkuRYM7juG354nSYNKVNUuEoCYQPwLjxojAd4UAPMm3bPTX` |
 | `EvaluateGuessV2Callback` (alt) | `26XAurXdkfmugxNKfwoyqJuA78TGLFXLrCx9kSt6Nbwzx5Q5yjfVwsvDUxZUp2dXHip4rZmnBmhnCnkFAZDsy1Eq` |
 | `EvaluateGuessV2Callback` (alt) | `2Ykbq7fNf2GycLKiWXAjLyJzBDwZN5sf52w4DbTAyaaZP6fBpxTsMNUBUwZJ3Zfx3zg8YxJFJSQRBc8QjRfkH42` |
+| Program upgrade adding `guess_symbols` to PlayerAttempt | `2vuRugzgQtT1MfvsspAWKLtEJzsSGXvaFdZNsk6xtY2gqoCw29WiNjpcnrsHHoAfeE4cHD4iDwBLPo8R7abFoqD1` |
 
 ## Repo
 

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -15,25 +15,45 @@ import { useAttempts } from "@/hooks/useAttempts";
 import { useGameActions } from "@/hooks/useGameActions";
 
 const MAX_ATTEMPTS = 10;
+const EXPLORER_BASE = "https://explorer.solana.com";
+const EXPLORER_CLUSTER = "?cluster=devnet";
+
+type LogKind = "init" | "submit" | "feedback" | "solved" | "error";
+interface LogEntry {
+  ts: number;
+  kind: LogKind;
+  message: string;
+  sig?: string;
+}
 
 type LocalMemory = Record<number, number[]>;
 
+function storageKey(date: number, owner: string) {
+  return `cryptanalyst:${owner}:${date}`;
+}
 function loadLocalGuesses(date: number, owner: string): LocalMemory {
   if (typeof window === "undefined") return {};
   try {
-    const raw = window.localStorage.getItem(`cryptanalyst:${owner}:${date}`);
+    const raw = window.localStorage.getItem(storageKey(date, owner));
     return raw ? (JSON.parse(raw) as LocalMemory) : {};
   } catch {
     return {};
   }
 }
-function saveLocalGuesses(date: number, owner: string, mem: LocalMemory) {
+// Read-modify-write so concurrent React state can't overwrite saved entries.
+function persistOneGuess(
+  date: number,
+  owner: string,
+  idx: number,
+  symbols: number[],
+) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(
-      `cryptanalyst:${owner}:${date}`,
-      JSON.stringify(mem),
-    );
+    const key = storageKey(date, owner);
+    const raw = window.localStorage.getItem(key);
+    const existing: LocalMemory = raw ? JSON.parse(raw) : {};
+    existing[idx] = symbols;
+    window.localStorage.setItem(key, JSON.stringify(existing));
   } catch {}
 }
 
@@ -56,9 +76,58 @@ export default function Page() {
     loadLocalGuesses(date, ownerKey),
   );
 
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const loggedFinalizedRef = useRef<Set<number>>(new Set());
+  const prevPuzzleStateRef = useRef(puzzle.state);
+  const lastErrorRef = useRef<string | null>(null);
+
+  function pushLog(entry: Omit<LogEntry, "ts">) {
+    setLog((prev) => [{ ...entry, ts: Date.now() }, ...prev].slice(0, 50));
+  }
+
   useEffect(() => {
     setLocalMem(loadLocalGuesses(date, ownerKey));
+    setLog([]);
+    loggedFinalizedRef.current = new Set();
   }, [date, ownerKey]);
+
+  // Re-merge from localStorage on every attempts update. This guards against
+  // any React state drift (HMR, accidental overwrites) while keeping the
+  // canonical source of truth in localStorage.
+  useEffect(() => {
+    const fromDisk = loadLocalGuesses(date, ownerKey);
+    setLocalMem((prev) => ({ ...prev, ...fromDisk }));
+  }, [attempts.length, date, ownerKey]);
+
+  useEffect(() => {
+    attempts.forEach((a, i) => {
+      if (a.finalized && !loggedFinalizedRef.current.has(a.attemptIdx)) {
+        loggedFinalizedRef.current.add(a.attemptIdx);
+        pushLog({
+          kind: "feedback",
+          message: `Guess #${i + 1} feedback received: ${a.exact}E · ${a.misplaced}M`,
+        });
+      }
+    });
+  }, [attempts]);
+
+  useEffect(() => {
+    if (prevPuzzleStateRef.current !== "Solved" && puzzle.state === "Solved") {
+      pushLog({
+        kind: "solved",
+        message: "Puzzle solved. The cluster has revealed today's code.",
+      });
+    }
+    prevPuzzleStateRef.current = puzzle.state;
+  }, [puzzle.state]);
+
+  useEffect(() => {
+    if (error && error !== lastErrorRef.current) {
+      lastErrorRef.current = error;
+      pushLog({ kind: "error", message: error });
+    }
+    if (!error) lastErrorRef.current = null;
+  }, [error]);
 
   // Auto-claim when last attempt is (4,0) and puzzle still Active.
   useEffect(() => {
@@ -72,7 +141,8 @@ export default function Page() {
       pending === "none"
     ) {
       void (async () => {
-        await claimSolve(last.attemptIdx);
+        const sig = await claimSolve(last.attemptIdx);
+        if (sig) pushLog({ kind: "solved", message: "Claim solve submitted", sig });
         await refetchPuzzle();
         await refetchAttempts();
       })();
@@ -86,9 +156,13 @@ export default function Page() {
   }, [attempts.length]);
 
   const boardAttempts: BoardAttempt[] = attempts.map((a) => ({
+    // On-chain guessSymbols is the source of truth for the post-upgrade
+    // program. localMem is the warm cache for the in-flight render before
+    // the next chain refetch lands. Either way, fall back to ? placeholders.
     symbols:
+      a.guessSymbols ??
       localMem[a.attemptIdx] ??
-      Array.from({ length: NUM_POSITIONS }, () => 0),
+      Array.from({ length: NUM_POSITIONS }, () => null),
     exact: a.exact,
     misplaced: a.misplaced,
     finalized: a.finalized,
@@ -110,7 +184,14 @@ export default function Page() {
 
   async function onPrimary() {
     if (puzzle.state === "NotInitialized" || generatingStuck) {
-      await initPuzzle();
+      const sig = await initPuzzle();
+      if (sig) {
+        pushLog({
+          kind: "init",
+          message: "Initialize puzzle submitted. Cluster generating today's code.",
+          sig,
+        });
+      }
       await refetchPuzzle();
       return;
     }
@@ -120,16 +201,27 @@ export default function Page() {
       attempts.length < MAX_ATTEMPTS
     ) {
       const symbols = pendingSymbols.map((s) => s as number);
-      // Use max of the on-chain counter and the count of fetched attempt PDAs.
-      // attemptCount only increments on successful callback; if a callback
-      // failed, the PDA still exists at the original index, so we must use
-      // attempts.length to skip past it.
-      const nextIdx = Math.max(puzzle.attemptCount, attempts.length);
-      const updated: LocalMemory = { ...localMem, [nextIdx]: symbols };
-      setLocalMem(updated);
-      saveLocalGuesses(date, ownerKey, updated);
+      const pdaIdx = puzzle.attemptCount;
+      // Save BEFORE submit. If .rpc() throws after the tx actually lands
+      // (Solana RPCs do retry-and-reject on duplicate signatures), we still
+      // have localMem populated under the expected key.
+      persistOneGuess(date, ownerKey, pdaIdx, symbols);
+      setLocalMem((prev) => ({ ...prev, [pdaIdx]: symbols }));
       setComputingTx(true);
-      await submitGuess(symbols, nextIdx);
+      const result = await submitGuess(symbols, pdaIdx);
+      if (result) {
+        const { sig, onChainAttemptIdx } = result;
+        // If the program stored a different idx (rare race), also save there.
+        if (onChainAttemptIdx !== pdaIdx) {
+          persistOneGuess(date, ownerKey, onChainAttemptIdx, symbols);
+          setLocalMem((prev) => ({ ...prev, [onChainAttemptIdx]: symbols }));
+        }
+        pushLog({
+          kind: "submit",
+          message: `Guess #${attempts.length + 1} submitted. Encrypted to the MPC cluster.`,
+          sig,
+        });
+      }
       await refetchPuzzle();
       await refetchAttempts();
     }
@@ -149,33 +241,45 @@ export default function Page() {
       return acc;
     }, null);
 
+  // Block submit while the previous attempt is mid-callback. Otherwise
+  // puzzle.attemptCount hasn't incremented yet and the next submit would
+  // re-use the same PDA seed, triggering AccountAlreadyInUse (0x0).
+  const lastAttempt = attempts[attempts.length - 1];
+  const waitingForCallback = !!lastAttempt && !lastAttempt.finalized;
+
   const primaryDisabled =
     pending !== "none" ||
     computingTx ||
     exhausted ||
+    puzzle.state === "Loading" ||
+    waitingForCallback ||
     (puzzle.state === "Active" && !allSlotsFilled);
 
   const primaryLabel =
-    puzzle.state === "NotInitialized"
-      ? "Initialize today's puzzle"
-      : generatingStuck
-        ? "Retry generation"
-        : puzzle.state === "Generating"
-          ? "Generating in cluster…"
-          : puzzle.state === "Solved"
-            ? "Already solved"
-            : exhausted
-              ? "Out of guesses · try tomorrow"
-              : computingTx || pending === "guess"
-                ? "Computing in MPC…"
-                : "Submit guess";
+    puzzle.state === "Loading"
+      ? "Loading puzzle…"
+      : puzzle.state === "NotInitialized"
+        ? "Initialize today's puzzle"
+        : generatingStuck
+          ? "Retry generation"
+          : puzzle.state === "Generating"
+            ? "Generating in cluster…"
+            : puzzle.state === "Solved"
+              ? "Already solved"
+              : exhausted
+                ? "Out of guesses · try tomorrow"
+                : waitingForCallback
+                  ? "Waiting for cluster feedback…"
+                  : computingTx || pending === "guess"
+                    ? "Computing in MPC…"
+                    : "Submit guess";
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-1 page-fade">
-        <div className="max-w-[1240px] mx-auto px-6 pt-8 pb-12 grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-12 grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
           <PuzzleCard
             date={date}
             state={puzzle.state}
@@ -283,6 +387,28 @@ export default function Page() {
               </div>
             </Section>
 
+            <Section
+              tag="#0.5"
+              label="Activity"
+              meta={log.length > 0 ? `${log.length} event${log.length === 1 ? "" : "s"}` : "live · devnet"}
+            >
+              <div className="panel p-0 overflow-hidden">
+                {log.length === 0 ? (
+                  <div className="p-4 font-mono text-[11px] tracking-[0.16em] uppercase text-text-dim">
+                    No activity yet. Submit a guess to see live logs.
+                  </div>
+                ) : (
+                  <div className="max-h-[360px] overflow-y-auto">
+                    <ul className="divide-y divide-[var(--line)]">
+                      {log.map((entry, idx) => (
+                        <LogRow key={`${entry.ts}-${idx}`} entry={entry} />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </Section>
+
             {error ? (
               <div className="panel p-4">
                 <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-rose mb-2">
@@ -338,5 +464,44 @@ function PrivacyCard({ title, body }: { title: string; body: string }) {
       </div>
       <p className="text-[12.5px] text-text-mute leading-relaxed">{body}</p>
     </div>
+  );
+}
+
+function LogRow({ entry }: { entry: LogEntry }) {
+  const time = new Date(entry.ts).toLocaleTimeString("en-US", { hour12: false });
+  const tag =
+    entry.kind === "init"
+      ? { label: "INIT", color: "text-accent-soft" }
+      : entry.kind === "submit"
+        ? { label: "SUBMIT", color: "text-accent-soft" }
+        : entry.kind === "feedback"
+          ? { label: "FEEDBACK", color: "text-green" }
+          : entry.kind === "solved"
+            ? { label: "SOLVED", color: "text-green" }
+            : { label: "ERROR", color: "text-rose" };
+  return (
+    <li className="px-4 py-3 flex flex-col gap-1">
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
+          {time}
+        </span>
+        <span className={`font-mono text-[10.5px] tracking-[0.16em] uppercase ${tag.color}`}>
+          {tag.label}
+        </span>
+        <span className="text-[12.5px] text-text leading-snug flex-1">
+          {entry.message}
+        </span>
+      </div>
+      {entry.sig ? (
+        <a
+          href={`${EXPLORER_BASE}/tx/${entry.sig}${EXPLORER_CLUSTER}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-[10.5px] tracking-[0.08em] text-accent-soft hover:text-accent break-all underline-offset-2 hover:underline"
+        >
+          tx · {entry.sig.slice(0, 10)}…{entry.sig.slice(-10)} ↗
+        </a>
+      ) : null}
+    </li>
   );
 }

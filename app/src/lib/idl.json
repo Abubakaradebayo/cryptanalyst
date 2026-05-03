@@ -818,6 +818,15 @@
           "type": "u32"
         },
         {
+          "name": "guess_symbols",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          }
+        },
+        {
           "name": "guess_ct_0",
           "type": {
             "array": [
@@ -2037,6 +2046,15 @@
           {
             "name": "submitted_at",
             "type": "i64"
+          },
+          {
+            "name": "guess_symbols",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
           }
         ]
       }

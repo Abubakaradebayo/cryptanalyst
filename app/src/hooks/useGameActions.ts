@@ -63,12 +63,10 @@ export function useGameActions(date: number) {
         .rpc({ skipPreflight: false, commitment: "confirmed" });
       return sig;
     } catch (e) {
-      console.error("[initPuzzle] full error:", e);
-      if (e && typeof e === "object") {
-        const anyErr = e as Record<string, unknown>;
-        if (Array.isArray(anyErr.logs)) console.error("logs:", anyErr.logs);
-        if (Array.isArray(anyErr.transactionLogs))
-          console.error("transactionLogs:", anyErr.transactionLogs);
+      if (!isBenignError(e)) {
+        console.error("[initPuzzle]", e);
+        const logs = extractLogs(e);
+        if (logs.length) console.error("logs:", logs);
       }
       setError(humanizeError(e));
       return null;
@@ -80,7 +78,7 @@ export function useGameActions(date: number) {
   async function submitGuess(
     symbols: number[],
     nextAttemptIdx: number,
-  ): Promise<string | null> {
+  ): Promise<{ sig: string; onChainAttemptIdx: number } | null> {
     if (!publicKey) return null;
     setError(null);
     setPending("guess");
@@ -88,12 +86,14 @@ export function useGameActions(date: number) {
       const mxePub = await fetchMXEPublicKey(provider, PROGRAM_ID);
       const enc = encryptGuess(symbols, mxePub);
       const offset = randomBn8();
+      const attemptPda = playerAttemptPda(date, publicKey, nextAttemptIdx);
 
       const sig = await program.methods
         .submitGuess(
           offset,
           date,
           nextAttemptIdx,
+          symbols,
           Array.from(enc.ciphertexts[0]),
           Array.from(enc.ciphertexts[1]),
           Array.from(enc.ciphertexts[2]),
@@ -104,16 +104,27 @@ export function useGameActions(date: number) {
         .accountsPartial({
           player: publicKey,
           puzzle: dailyPuzzlePda(date),
-          attempt: playerAttemptPda(date, publicKey, nextAttemptIdx),
+          attempt: attemptPda,
           ...arciumAccounts("evaluate_guess_v2", offset),
         })
         .rpc({ skipPreflight: false, commitment: "confirmed" });
-      return sig;
+
+      // Read the actual on-chain attempt_idx the program stored. It's set to
+      // puzzle.attempt_count at submit time, which can race with our local
+      // read. Trusting the chain here removes the entire class of "saved
+      // localMem at the wrong key" bugs. Best-effort: fall back to nextAttemptIdx
+      // if the read fails (rare — the tx just confirmed).
+      let onChainAttemptIdx = nextAttemptIdx;
+      try {
+        const acc = await program.account.playerAttempt.fetch(attemptPda);
+        onChainAttemptIdx = acc.attemptIdx;
+      } catch {}
+      return { sig, onChainAttemptIdx };
     } catch (e) {
-      console.error("[submitGuess] full error:", e);
-      if (e && typeof e === "object") {
-        const anyErr = e as Record<string, unknown>;
-        if (Array.isArray(anyErr.logs)) console.error("logs:", anyErr.logs);
+      if (!isBenignError(e)) {
+        console.error("[submitGuess]", e);
+        const logs = extractLogs(e);
+        if (logs.length) console.error("logs:", logs);
       }
       setError(humanizeError(e));
       return null;
@@ -151,6 +162,37 @@ export function useGameActions(date: number) {
   return { initPuzzle, submitGuess, claimSolve, pending, error };
 }
 
+// Errors we deliberately don't dump to console.error: wallet rejections (the
+// user chose to cancel) and duplicate-tx retries (the original landed).
+function isBenignError(e: unknown): boolean {
+  if (typeof e !== "object" || e === null) return false;
+  const err = e as {
+    name?: string;
+    code?: number | string;
+    message?: string;
+    error?: { code?: number; message?: string };
+  };
+  const code = err.code ?? err.error?.code;
+  if (
+    code === 4001 ||
+    code === "USER_REJECTED" ||
+    err.name === "WalletSignTransactionError" ||
+    /user rejected|user denied|rejected the request/i.test(err.message ?? "")
+  ) {
+    return true;
+  }
+  if (/already.*been.*processed|already.*processed/i.test(err.message ?? "")) {
+    return true;
+  }
+  return false;
+}
+
+function extractLogs(e: unknown): string[] {
+  if (typeof e !== "object" || e === null) return [];
+  const err = e as { logs?: string[]; transactionLogs?: string[] };
+  return err.logs ?? err.transactionLogs ?? [];
+}
+
 function humanizeError(e: unknown): string {
   if (typeof e !== "object" || e === null) return String(e);
   const err = e as {
@@ -161,6 +203,25 @@ function humanizeError(e: unknown): string {
     logs?: string[];
     transactionLogs?: string[];
   };
+
+  // Solana RPC re-sends the same signed tx as a retry while waiting for
+  // confirmation. Once the original lands, the retry is rejected with this
+  // message. Returning empty string suppresses it from the UI.
+  if (/already.*been.*processed|already.*processed/i.test(err.message ?? "")) {
+    return "";
+  }
+
+  // SystemProgram::AccountAlreadyInUse surfaces as "custom program error: 0x0"
+  // when init-ing a PDA whose address was already taken. In our flow this
+  // means the previous callback hasn't finalized yet so the next attempt PDA
+  // collides. Tell the user to wait, don't show the raw hex.
+  const allLogs = (err.logs ?? err.transactionLogs ?? []).join(" ");
+  if (
+    /custom program error: 0x0/i.test(err.message ?? "") ||
+    /custom program error: 0x0/i.test(allLogs)
+  ) {
+    return "Previous guess is still being computed by the cluster. Wait for the feedback row to land, then submit again.";
+  }
 
   // Wallet-adapter rejections
   const code = err.code ?? err.error?.code;

@@ -125,6 +125,7 @@ pub mod cryptanalyst {
         computation_offset: u64,
         _date: u32,
         _attempt_idx: u32,
+        guess_symbols: [u8; 4],
         guess_ct_0: [u8; 32],
         guess_ct_1: [u8; 32],
         guess_ct_2: [u8; 32],
@@ -148,6 +149,7 @@ pub mod cryptanalyst {
         attempt.misplaced = 0;
         attempt.finalized = false;
         attempt.submitted_at = Clock::get()?.unix_timestamp;
+        attempt.guess_symbols = guess_symbols;
 
         ctx.accounts.sign_pda_account.bump = ctx.bumps.sign_pda_account;
 
@@ -650,6 +652,10 @@ pub struct PlayerAttempt {
     pub misplaced: u8,
     pub finalized: bool,
     pub submitted_at: i64,
+    // Plaintext guess for on-chain display. The cluster never sees this in
+    // plaintext; it's only here so the frontend can render the player's own
+    // guess history without depending on browser localStorage.
+    pub guess_symbols: [u8; 4],
 }
 
 #[account]

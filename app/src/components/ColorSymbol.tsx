@@ -26,7 +26,7 @@ export function ColorSymbol({ index, size = 36, selected, onClick, pulse }: Prop
           background: "rgba(255,255,255,0.02)",
         }}
       >
-        <span className="font-mono text-[10px] text-text-dim">-</span>
+        <span className="font-mono text-[12px] text-text-dim">?</span>
       </div>
     );
   }

@@ -30,14 +30,13 @@ export async function fetchMXEPublicKey(
         cachedMXEPublicKey = k;
         return k;
       }
-    } catch (e) {
-      if (attempt === retries) {
-        console.warn("[fetchMXEPublicKey] all retries failed, using snapshot fallback:", e);
-      }
+    } catch {
+      // Snapshot fallback handles this. Don't surface to the console.
     }
     if (attempt < retries) await new Promise((r) => setTimeout(r, retryDelayMs));
   }
   cachedMXEPublicKey = MXE_X25519_PUBKEY_FALLBACK;
+  console.info("[fetchMXEPublicKey] using verified snapshot pubkey (RPC deserializer mismatch)");
   return MXE_X25519_PUBKEY_FALLBACK;
 }
 

@@ -3,7 +3,7 @@ import { GuessRow } from "./GuessRow";
 import { NUM_POSITIONS } from "@/lib/constants";
 
 export interface BoardAttempt {
-  symbols: number[];
+  symbols: (number | null)[];
   exact: number;
   misplaced: number;
   finalized: boolean;

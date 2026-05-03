@@ -824,6 +824,15 @@ export type Cryptanalyst = {
           "type": "u32"
         },
         {
+          "name": "guessSymbols",
+          "type": {
+            "array": [
+              "u8",
+              4
+            ]
+          }
+        },
+        {
           "name": "guessCt0",
           "type": {
             "array": [
@@ -2043,6 +2052,15 @@ export type Cryptanalyst = {
           {
             "name": "submittedAt",
             "type": "i64"
+          },
+          {
+            "name": "guessSymbols",
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
           }
         ]
       }
