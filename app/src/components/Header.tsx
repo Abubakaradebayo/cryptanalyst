@@ -17,7 +17,7 @@ export function Header() {
           <span className="group-hover:[&>svg]:animate-[flower-spin_1.4s_linear_infinite]">
             <FlowerMark size={16} />
           </span>
-          <span className="font-mono text-[12px] tracking-[0.18em] uppercase">
+          <span className="hidden xs:inline sm:inline font-mono text-[12px] tracking-[0.18em] uppercase">
             Cryptanalyst
           </span>
         </Link>
@@ -30,7 +30,7 @@ export function Header() {
             href="https://docs.arcium.com/"
             target="_blank"
             rel="noreferrer"
-            className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute hover:text-text"
+            className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute hover:text-text whitespace-nowrap"
           >
             Arcium
           </a>
@@ -45,15 +45,15 @@ export function Header() {
             />
           </div>
         ) : null}
-        <div className="shrink-0">
+        <div className="shrink-0 wallet-compact">
           <ClientOnly
             fallback={
               <button
                 className="btn-primary"
                 disabled
-                style={{ minWidth: 120, justifyContent: "center" }}
+                style={{ minWidth: 110, justifyContent: "center" }}
               >
-                ...
+                …
               </button>
             }
           >
@@ -61,7 +61,7 @@ export function Header() {
           </ClientOnly>
         </div>
       </div>
-      <nav className="md:hidden hairline-t flex items-center gap-4 px-4 py-2 overflow-x-auto">
+      <nav className="md:hidden hairline-t flex items-center justify-center gap-5 px-3 py-2.5 overflow-x-auto">
         <NavLink href="/">Today</NavLink>
         <NavLink href="/how-to-play">How to play</NavLink>
         <NavLink href="/leaderboard">Leaderboard</NavLink>
@@ -84,7 +84,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       prefetch
-      className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute hover:text-text transition-colors"
+      className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute hover:text-text transition-colors whitespace-nowrap"
     >
       {children}
     </Link>

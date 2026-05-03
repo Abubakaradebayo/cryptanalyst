@@ -262,6 +262,18 @@ html, body {
   letter-spacing: 0.01em !important;
   text-transform: none !important;
 }
+@media (max-width: 480px) {
+  .wallet-compact .wallet-adapter-button {
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+    max-width: 160px !important;
+  }
+  .wallet-compact .wallet-adapter-button-trigger {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 .wallet-adapter-button:not([disabled]):hover { filter: brightness(1.06); }
 .wallet-adapter-modal-wrapper { background: var(--panel) !important; border: 1px solid var(--line-strong) !important; border-radius: 0 !important; }
 .wallet-adapter-modal-button-close { background: var(--panel-2) !important; }
