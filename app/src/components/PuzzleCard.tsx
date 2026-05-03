@@ -45,7 +45,7 @@ export function PuzzleCard({
       exhausted ? (
         <StatusBadge variant="mute">Out of guesses</StatusBadge>
       ) : (
-        <StatusBadge variant="active">Up for grabs</StatusBadge>
+        <StatusBadge variant="active">Active</StatusBadge>
       )
     ) : state === "Generating" ? (
       <StatusBadge variant="computing">Generating · MPC</StatusBadge>
