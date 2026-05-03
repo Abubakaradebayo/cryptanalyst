@@ -15,18 +15,20 @@ export default function HowToPlay() {
       <Header />
       <main className="flex-1 page-fade">
         <div className="max-w-[920px] mx-auto px-6 pt-10 pb-16">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
             <StatusBadge variant="accent">Cryptanalyst</StatusBadge>
+            <StatusBadge variant="mute">Powered by Arcium</StatusBadge>
             <StatusBadge variant="mute">Guide · v1</StatusBadge>
           </div>
           <h1 className="text-[40px] leading-[1.05] tracking-tight font-medium mb-4">
             How to play
           </h1>
           <p className="text-text-mute text-[15px] max-w-[64ch] leading-relaxed mb-12">
-            A daily 4-symbol code-breaking puzzle. Same code worldwide, fresh
-            every UTC midnight. The answer is generated inside the Arcium MPC
-            cluster, nobody knows it until someone solves it. Here&apos;s how to
-            play in five steps.
+            Crack a daily 4-color code in 10 tries. Same puzzle for everyone,
+            fresh every midnight UTC. The catch: Arcium&apos;s encrypted compute
+            network generates the answer and locks it away. Nobody, not us, not
+            the validators, not even Arcium itself, can read it until someone
+            cracks it. Here&apos;s how to play in five steps.
           </p>
 
           <SectionHeader tag="#0.1" label="The 5 steps" meta="2 min to play" />
@@ -34,31 +36,31 @@ export default function HowToPlay() {
             <Step
               n="01"
               title="Connect a Solana wallet"
-              body="Click Connect Wallet (top right). Phantom or Solflare both work. Your wallet is your identity: no email, no password, no server account. Every guess you make is signed with this wallet, and the leaderboard is keyed to your public key."
-              note="On devnet you'll need a small amount of devnet SOL to pay transaction fees. Get it free from the Solana faucet."
+              body="Click Connect Wallet, top right. Phantom or Solflare both work. Your wallet is your identity here, no email or password needed. Every guess is signed by it, and the leaderboard tracks your wallet address."
+              note="You'll need a tiny bit of devnet SOL for transaction fees. Free from the Solana faucet."
             />
             <Step
               n="02"
-              title="Initialize today's puzzle (if no one has yet)"
-              body="If today's puzzle hasn't been started, the main button reads Initialize today's puzzle. Click it. The MPC cluster generates a brand-new 4-symbol code from cryptographic randomness distributed across multiple nodes. The code is stored on Solana as ciphertext that nobody, not you, not us, not the validators, can decrypt."
-              note="Anyone in the world can do this. First caller wins; everyone else plays the same code."
+              title="Start today's puzzle"
+              body="If today's puzzle hasn't been started yet, the button reads Initialize today's puzzle. Click it. Arcium generates a fresh 4-color code that nobody, you, us, anyone, can read. Once it's running, everyone in the world is playing the same one until midnight."
+              note="Anyone can start it. The first to click triggers the generation; everyone else just plays."
             />
             <Step
               n="03"
-              title="Pick four symbols"
-              body="Tap a slot in the active row, then click a color from the 6-color palette. Repeat until all four slots are filled. You can re-tap a slot to overwrite, or use Clear to start the row over."
+              title="Pick four colors"
+              body="Tap a slot in the active row, then click a color from the palette. Fill all four slots. Hit Clear to redo the row, or just tap a slot to overwrite it."
               extra={<PaletteRow />}
             />
             <Step
               n="04"
               title="Submit the guess"
-              body="The button switches to Submit guess once all four slots are filled. Click it. Behind the scenes your browser does an x25519 Diffie-Hellman handshake with the cluster, encrypts your guess with the Rescue cipher, and your wallet signs a Solana transaction that queues the comparison. The cluster compares your encrypted guess with the encrypted code, without ever decrypting either, and returns just two small public numbers."
-              note="Each guess takes a few seconds while the MPC runs. The button shows Computing in MPC… and the active row pulses purple while you wait."
+              body="Once all four slots are filled, the button changes to Submit guess. Click it and your wallet signs the transaction. Your guess is encrypted before it leaves your browser. Arcium compares it to the answer without ever seeing either side in plain text, then sends back a score."
+              note="Takes about 10-30 seconds. The button shows Computing in MPC… while you wait."
             />
             <Step
               n="05"
-              title="Read the feedback, repeat, solve"
-              body="Each finalized guess shows pegs to the right. Green = correct symbol in correct slot (exact). Purple = correct symbol in wrong slot (misplaced). Empty = symbol not in the code. You have 10 guesses to reach 4 exact / 0 misplaced. On a solve, the cluster automatically reveals today's code and your score lands on the leaderboard."
+              title="Read the score, repeat, solve"
+              body="Each finalized guess shows pegs on the right. Green = right color, right spot. Purple = right color, wrong spot. No peg = that color isn't in the code. You have 10 guesses to get 4 greens. When you solve it, Arcium reveals the code and your score lands on the leaderboard."
               extra={<FeedbackExample />}
             />
           </div>
@@ -107,15 +109,15 @@ export default function HowToPlay() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <PrivacyPoint
                 title="The daily code"
-                body="Stored on Solana as ciphertext. Decryptable only by the MPC cluster as a whole. No single node ever holds plaintext. Even we can't read it."
+                body="On Solana as encrypted bytes. Only the network as a whole can read it, and only when someone solves it. Not even we can peek."
               />
               <PrivacyPoint
                 title="Your guess"
-                body="Encrypted in your browser before it leaves. The chain stores ciphertext only. Other players can't see what you guessed."
+                body="Encrypted in your browser before it goes anywhere. The chain just stores scrambled bytes. Other players can't see what you picked."
               />
               <PrivacyPoint
                 title="Public (by design)"
-                body="The (exact, misplaced) feedback per guess, your wallet, your guess count, your solve time. Same as a physical Mastermind board, nothing more."
+                body="Your wallet, your score per guess, your time to solve. Same as a Mastermind board where everyone sees the pegs but not your secret."
               />
             </div>
           </div>
@@ -128,23 +130,23 @@ export default function HowToPlay() {
             />
             <FAQ
               q="Does it cost money?"
-              a="On devnet, no. Devnet SOL is free from the faucet. On mainnet, each guess costs a tiny network fee (fractions of a cent) plus the cost of running the MPC computation."
+              a="On devnet, basically no. You'll spend a few cents worth of devnet SOL on transaction fees, and devnet SOL is free from the faucet. On mainnet, each guess would cost fractions of a cent."
             />
             <FAQ
               q="What if my guess transaction fails?"
-              a="If the wallet rejects it or the network drops it, no attempt is recorded. You can try again. If the cluster aborts the computation, the program reports an error and the attempt is left unfinalized; you can submit a new guess."
+              a="If your wallet rejects it or the network drops it, nothing is recorded. Just try again. The only edge case: if the cluster aborts mid-computation, your attempt sits unfinalized and you can submit a new one."
             />
             <FAQ
               q="Can I see other players' guesses?"
-              a="No. Other players' guesses are encrypted on chain. The only public information about any attempt is the (exact, misplaced) result."
+              a="No. Their guesses are scrambled too. All you can see is their score per guess, same as you."
             />
             <FAQ
               q="What if the puzzle isn't solved by midnight UTC?"
-              a="A new puzzle is initialized for the next day. Yesterday's code stays encrypted forever (unless someone solves it later, which the contract still permits)."
+              a="A new one starts. The old code stays encrypted forever, unless someone goes back and solves it later (the contract still allows it)."
             />
             <FAQ
               q="Why six colors and four positions?"
-              a="6^4 = 1296 possible codes. With 10 guesses, an optimal solver always wins; a fast human solver wins most days. It's the same difficulty as classic Mastermind for a reason. It's been tuned for human enjoyment for 50 years."
+              a="6 colors and 4 slots gives you 1,296 possible codes. With 10 guesses you'll usually win. Same setup as the Mastermind board game, and that's been tuned for fun for 50 years."
             />
           </div>
 

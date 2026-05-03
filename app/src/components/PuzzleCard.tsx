@@ -67,9 +67,9 @@ export function PuzzleCard({
 
   return (
     <div className="panel p-6 flex flex-col" style={{ minHeight: 580 }}>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <StatusBadge variant="accent">Cryptanalyst</StatusBadge>
-        <StatusBadge variant="mute">Onchain</StatusBadge>
+        <StatusBadge variant="mute">Powered by Arcium</StatusBadge>
         {stateBadge}
       </div>
 
@@ -77,8 +77,8 @@ export function PuzzleCard({
         Daily Cipher
       </h2>
       <p className="text-text-mute text-[13px] mb-5 max-w-[36ch] leading-relaxed">
-        Crack today&apos;s 4-symbol code. Generated inside the Arcium MPC
-        cluster. Nobody knows the answer until someone solves it.
+        Crack today&apos;s 4-color code. The answer is encrypted by Arcium,
+        nobody knows it until someone solves it.
       </p>
 
       <div

@@ -297,13 +297,12 @@ export default function Page() {
           <div className="flex flex-col gap-6">
             <Section tag="#0.1" label="Objective" meta="onchain · solana">
               <p className="text-[14px] text-text-mute leading-relaxed">
-                Crack the daily 4-symbol code in {MAX_ATTEMPTS} guesses or fewer.
-                After each guess, the cluster returns{" "}
-                <span className="text-text">exact</span> matches (correct symbol,
-                correct position) and{" "}
-                <span className="text-text">misplaced</span> matches (correct
-                symbol, wrong position). The code itself never leaves the
-                encrypted state until you solve it.
+                Crack today&apos;s 4-color code in {MAX_ATTEMPTS} guesses. After
+                each one, you get a score:{" "}
+                <span className="text-text">exact</span> (right color, right
+                spot) and <span className="text-text">misplaced</span> (right
+                color, wrong spot). The code itself stays encrypted until
+                someone cracks it.
               </p>
             </Section>
 
@@ -350,18 +349,21 @@ export default function Page() {
             </Section>
 
             <Section tag="#0.3" label="Privacy" meta="MPC · Arcium">
+              <p className="text-[14px] text-text-mute leading-relaxed mb-4">
+                Cryptanalyst is fair by math. Here&apos;s how:
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <PrivacyCard
-                  title="Encrypted code"
-                  body="Today's secret was generated inside the MPC cluster from cryptographically distributed shares. No party, not the developers, not validators, not the cluster operators, has the plaintext."
+                  title="Nobody knows the answer"
+                  body="Today's code was generated inside Arcium's encrypted compute network. Not even the developers, the validators, or Arcium itself can read it as a single piece."
                 />
                 <PrivacyCard
-                  title="Encrypted guess"
-                  body="Your guess is encrypted to the cluster via x25519 + Rescue cipher before it leaves your browser. The chain stores ciphertext only."
+                  title="Your guess is scrambled"
+                  body="Your browser encrypts every guess before it goes anywhere. Arcium compares it to the answer without either side ever showing up in plain text."
                 />
                 <PrivacyCard
-                  title="Public reveal, only on solve"
-                  body="Each guess returns just (exact, misplaced). The full code is revealed by the MPC cluster only after a (4, 0) result triggers claim_solve."
+                  title="You only see the score"
+                  body="After each guess you get how many colors are exactly right and how many are misplaced. The full answer only appears once someone cracks all four."
                 />
               </div>
             </Section>
