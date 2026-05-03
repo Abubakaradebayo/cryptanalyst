@@ -25,6 +25,7 @@ export function Header() {
           <NavLink href="/">Today</NavLink>
           <NavLink href="/how-to-play">How to play</NavLink>
           <NavLink href="/leaderboard">Leaderboard</NavLink>
+          <NavLink href="/wins">My wins</NavLink>
           <a
             href="https://docs.arcium.com/"
             target="_blank"

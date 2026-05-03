@@ -13,6 +13,7 @@ import { NUM_POSITIONS, SYMBOL_PALETTE } from "@/lib/constants";
 import { usePuzzle } from "@/hooks/usePuzzle";
 import { useAttempts } from "@/hooks/useAttempts";
 import { useGameActions } from "@/hooks/useGameActions";
+import { usePlayerWins } from "@/hooks/usePlayerWins";
 
 const MAX_ATTEMPTS = 10;
 const EXPLORER_BASE = "https://explorer.solana.com";
@@ -64,6 +65,7 @@ export default function Page() {
   const { attempts, refetch: refetchAttempts } = useAttempts(date, publicKey);
   const { initPuzzle, submitGuess, claimSolve, pending, error } =
     useGameActions(date);
+  const { data: wins, refetch: refetchWins } = usePlayerWins(publicKey, date);
 
   const [pendingSymbols, setPendingSymbols] = useState<(number | null)[]>(
     Array.from({ length: NUM_POSITIONS }, () => null),
@@ -145,9 +147,10 @@ export default function Page() {
         if (sig) pushLog({ kind: "solved", message: "Claim solve submitted", sig });
         await refetchPuzzle();
         await refetchAttempts();
+        await refetchWins();
       })();
     }
-  }, [attempts, puzzle.state, claimSolve, pending, refetchPuzzle, refetchAttempts]);
+  }, [attempts, puzzle.state, claimSolve, pending, refetchPuzzle, refetchAttempts, refetchWins]);
 
   useEffect(() => {
     setPendingSymbols(Array.from({ length: NUM_POSITIONS }, () => null));
@@ -295,6 +298,43 @@ export default function Page() {
           />
 
           <div className="flex flex-col gap-6">
+            {publicKey && wins.totalSolves > 0 ? (
+              <div className="panel p-4 flex items-center gap-4 flex-wrap">
+                {wins.streak > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex items-center justify-center"
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: "50%",
+                        background: "rgba(167,139,250,0.16)",
+                        border: "1px solid var(--line-accent)",
+                        color: "var(--accent)",
+                        fontSize: 12,
+                      }}
+                      aria-hidden
+                    >
+                      ★
+                    </span>
+                    <span className="font-mono text-[12px] tracking-[0.08em]">
+                      <span className="text-accent">{wins.streak}-day</span>{" "}
+                      <span className="text-text-mute">streak</span>
+                    </span>
+                  </div>
+                ) : null}
+                <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-dim">
+                  · {wins.totalSolves} total solve{wins.totalSolves === 1 ? "" : "s"}
+                </div>
+                <div className="flex-1" />
+                <a
+                  href="/wins"
+                  className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-soft hover:text-accent"
+                >
+                  View all →
+                </a>
+              </div>
+            ) : null}
             <Section tag="#0.1" label="Objective" meta="onchain · solana">
               <p className="text-[14px] text-text-mute leading-relaxed">
                 Crack today&apos;s 4-color code in {MAX_ATTEMPTS} guesses. After
@@ -427,12 +467,20 @@ export default function Page() {
                 <StatusBadge variant="solved">Cracked</StatusBadge>
                 <div className="flex-1 min-w-[200px]">
                   <div className="text-[14px] mb-1">
-                    Today&apos;s code has been cracked.
+                    {wins.wins.some((w) => w.date === date)
+                      ? "You cracked today's code."
+                      : "Today's code has been cracked."}
                   </div>
                   <div className="text-[12px] text-text-mute">
                     A new puzzle drops at midnight UTC. Come back to race for it.
                   </div>
                 </div>
+                {wins.wins.some((w) => w.date === date) ? (
+                  <ShareWinButton
+                    guesses={wins.wins.find((w) => w.date === date)!.guessesTaken}
+                    timeSecs={wins.wins.find((w) => w.date === date)!.timeToSolveSecs}
+                  />
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -441,6 +489,31 @@ export default function Page() {
 
       <Footer />
     </div>
+  );
+}
+
+function ShareWinButton({
+  guesses,
+  timeSecs,
+}: {
+  guesses: number;
+  timeSecs: number;
+}) {
+  const m = Math.floor(timeSecs / 60);
+  const s = timeSecs % 60;
+  const time = m > 0 ? `${m}m ${s}s` : `${s}s`;
+  const text = `I cracked today's Cryptanalyst in ${guesses} guess${guesses === 1 ? "" : "es"} (${time}). The answer is encrypted by @ArciumHQ MPC, nobody can read it until someone solves it.\n\nTry it: https://cryptanalyst.vercel.app`;
+  const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-primary"
+      style={{ fontSize: 12 }}
+    >
+      Share your win <span aria-hidden>↗</span>
+    </a>
   );
 }
 
