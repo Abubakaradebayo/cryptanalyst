@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
+import { WelcomeModal } from "@/components/WelcomeModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen">
-        <WalletProvider>{children}</WalletProvider>
+        <WalletProvider>
+          {children}
+          <WelcomeModal />
+        </WalletProvider>
       </body>
     </html>
   );
