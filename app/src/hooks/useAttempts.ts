@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PublicKey } from "@solana/web3.js";
-import { useConnection } from "@solana/wallet-adapter-react";
-import { PROGRAM_ID } from "@/lib/constants";
 import { useArciumProgram } from "./useArciumProgram";
 
 export interface AttemptData {
@@ -15,7 +13,6 @@ export interface AttemptData {
 }
 
 export function useAttempts(date: number, player: PublicKey | null) {
-  const { connection } = useConnection();
   const { program } = useArciumProgram();
   const [attempts, setAttempts] = useState<AttemptData[]>([]);
 
@@ -24,40 +21,35 @@ export function useAttempts(date: number, player: PublicKey | null) {
       setAttempts([]);
       return;
     }
-    // Use raw getProgramAccounts so we can decode each result individually.
-    // Pre-upgrade PDAs are 4 bytes shorter (no guess_symbols field) and will
-    // throw on decode. Skip them rather than letting one bad legacy account
-    // wipe the whole list.
-    const raw = await connection.getProgramAccounts(PROGRAM_ID, {
-      filters: [
+    // Filter at the RPC level by dataSize so legacy 68-byte PDAs (pre
+    // guess_symbols upgrade) never reach the decoder. New layout is 72 bytes:
+    // 8 disc + 1 bump + 32 player + 4 date + 4 idx + 8 offset + 1 exact +
+    // 1 misplaced + 1 finalized + 8 submitted_at + 4 guess_symbols.
+    const NEW_LAYOUT_SIZE = 72;
+    let all: Awaited<ReturnType<typeof program.account.playerAttempt.all>> = [];
+    try {
+      all = await program.account.playerAttempt.all([
+        { dataSize: NEW_LAYOUT_SIZE },
         { memcmp: { offset: 8 + 1, bytes: player.toBase58() } },
-      ],
-    });
-    const decoded: AttemptData[] = [];
-    for (const { account } of raw) {
-      try {
-        const acc = program.coder.accounts.decode(
-          "playerAttempt",
-          account.data,
-        );
-        if (acc.date !== date) continue;
-        decoded.push({
-          attemptIdx: acc.attemptIdx,
-          exact: acc.exact,
-          misplaced: acc.misplaced,
-          finalized: acc.finalized,
-          submittedAt: Number(acc.submittedAt),
-          guessSymbols: Array.isArray(acc.guessSymbols)
-            ? Array.from(acc.guessSymbols as number[])
-            : null,
-        });
-      } catch {
-        // Legacy PDA without guess_symbols. Silently skip.
-      }
+      ]);
+    } catch {
+      all = [];
     }
-    decoded.sort((a, b) => a.attemptIdx - b.attemptIdx);
-    setAttempts(decoded);
-  }, [connection, date, player, program]);
+    const filtered = all
+      .filter((a) => a.account.date === date)
+      .map((a) => ({
+        attemptIdx: a.account.attemptIdx,
+        exact: a.account.exact,
+        misplaced: a.account.misplaced,
+        finalized: a.account.finalized,
+        submittedAt: Number(a.account.submittedAt),
+        guessSymbols: Array.isArray(a.account.guessSymbols)
+          ? Array.from(a.account.guessSymbols as number[])
+          : null,
+      }))
+      .sort((a, b) => a.attemptIdx - b.attemptIdx);
+    setAttempts(filtered);
+  }, [date, player, program]);
 
   useEffect(() => {
     void refetch();
