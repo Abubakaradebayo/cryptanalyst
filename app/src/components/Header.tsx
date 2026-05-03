@@ -17,7 +17,7 @@ export function Header() {
           <span className="group-hover:[&>svg]:animate-[flower-spin_1.4s_linear_infinite]">
             <FlowerMark size={16} />
           </span>
-          <span className="hidden xs:inline sm:inline font-mono text-[12px] tracking-[0.18em] uppercase">
+          <span className="font-mono text-[11px] sm:text-[12px] tracking-[0.18em] uppercase">
             Cryptanalyst
           </span>
         </Link>
