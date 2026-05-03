@@ -180,10 +180,7 @@ export function PuzzleCard({
           </div>
         ) : null}
 
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-          <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
-            day · {date}
-          </span>
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-end">
           <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
             {formatPuzzleDate(date)}
           </span>

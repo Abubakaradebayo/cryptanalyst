@@ -10,7 +10,12 @@ export function puzzleDateToDate(d: number): Date {
 }
 
 export function formatPuzzleDate(d: number): string {
-  return puzzleDateToDate(d).toISOString().slice(0, 10);
+  return puzzleDateToDate(d).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 export function timeUntilNextUtcMidnight(): number {
