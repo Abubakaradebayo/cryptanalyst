@@ -115,7 +115,7 @@ export default function Page() {
     if (prevPuzzleStateRef.current !== "Solved" && puzzle.state === "Solved") {
       pushLog({
         kind: "solved",
-        message: "Puzzle solved. The cluster has revealed today's code.",
+        message: "Cracked. Today's code is revealed. New puzzle at midnight UTC.",
       });
     }
     prevPuzzleStateRef.current = puzzle.state;
@@ -423,11 +423,16 @@ export default function Page() {
             ) : null}
 
             {puzzle.state === "Solved" ? (
-              <div className="panel p-5 flex items-center gap-4 glow-purple">
-                <StatusBadge variant="solved">SOLVED</StatusBadge>
-                <span className="text-[14px]">
-                  The cluster has revealed today&apos;s code.
-                </span>
+              <div className="panel p-5 flex items-center gap-4 glow-purple flex-wrap">
+                <StatusBadge variant="solved">Cracked</StatusBadge>
+                <div className="flex-1 min-w-[200px]">
+                  <div className="text-[14px] mb-1">
+                    Today&apos;s code has been cracked.
+                  </div>
+                  <div className="text-[12px] text-text-mute">
+                    A new puzzle drops at midnight UTC. Come back to race for it.
+                  </div>
+                </div>
               </div>
             ) : null}
           </div>

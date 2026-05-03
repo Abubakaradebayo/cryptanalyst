@@ -40,12 +40,12 @@ export function PuzzleCard({
 
   const stateBadge =
     state === "Solved" ? (
-      <StatusBadge variant="solved">Solved</StatusBadge>
+      <StatusBadge variant="solved">Cracked</StatusBadge>
     ) : state === "Active" ? (
       exhausted ? (
         <StatusBadge variant="mute">Out of guesses</StatusBadge>
       ) : (
-        <StatusBadge variant="active">Active</StatusBadge>
+        <StatusBadge variant="active">Up for grabs</StatusBadge>
       )
     ) : state === "Generating" ? (
       <StatusBadge variant="computing">Generating · MPC</StatusBadge>
@@ -76,10 +76,28 @@ export function PuzzleCard({
       <h2 className="text-[28px] leading-[1.1] font-medium mb-2 tracking-tight">
         Daily Cipher
       </h2>
-      <p className="text-text-mute text-[13px] mb-5 max-w-[36ch] leading-relaxed">
-        Crack today&apos;s 4-color code. The answer is encrypted by Arcium,
-        nobody knows it until someone solves it.
+      <p className="text-text-mute text-[13px] mb-3 max-w-[36ch] leading-relaxed">
+        Be the first to crack today&apos;s 4-color code. The answer is encrypted
+        by Arcium, nobody can read it until someone solves it.
       </p>
+      {state === "Active" && !exhausted ? (
+        <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent mb-5 flex items-center gap-2">
+          <span
+            className="inline-block"
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "var(--accent)",
+              boxShadow: "0 0 8px var(--accent)",
+              animation: "pulse-accent 1.4s ease-in-out infinite",
+            }}
+          />
+          First wallet to crack it wins the day
+        </div>
+      ) : (
+        <div className="mb-5" />
+      )}
 
       <div
         className="relative panel-2 dotted-bg flex-1 mb-5 overflow-hidden flex flex-col items-center justify-center gap-5"
@@ -114,8 +132,11 @@ export function PuzzleCard({
         </div>
 
         {state === "Solved" ? (
-          <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-green">
-            Revealed by the cluster
+          <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-green text-center">
+            Cracked
+            <span className="block text-text-dim mt-1">
+              Resets at midnight UTC
+            </span>
           </div>
         ) : exhausted ? (
           <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute text-center">
