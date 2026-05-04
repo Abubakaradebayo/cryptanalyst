@@ -14,139 +14,122 @@ export default function HowToPlay() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 page-fade">
-        <div className="max-w-[920px] mx-auto px-6 pt-10 pb-16">
+        <div className="max-w-[920px] mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16">
           <div className="flex items-center gap-3 mb-3 flex-wrap">
             <StatusBadge variant="accent">Cryptanalyst</StatusBadge>
             <StatusBadge variant="mute">Powered by Arcium</StatusBadge>
-            <StatusBadge variant="mute">Guide · v1</StatusBadge>
+            <StatusBadge variant="mute">Guide</StatusBadge>
           </div>
           <h1 className="text-[40px] leading-[1.05] tracking-tight font-medium mb-4">
             How to play
           </h1>
-          <p className="text-text-mute text-[15px] max-w-[64ch] leading-relaxed mb-12">
-            Crack a daily 4-color code in 10 tries. Same puzzle for everyone,
-            fresh every midnight UTC. The catch: Arcium&apos;s encrypted compute
-            network generates the answer and locks it away. Nobody, not us, not
-            the validators, not even Arcium itself, can read it until someone
-            cracks it. Here&apos;s how to play in five steps.
+          <p className="text-text-mute text-[16px] max-w-[60ch] leading-relaxed mb-10">
+            Guess the 4-color code in 10 tries. You get hints after each guess.
+            First to crack it wins today.
           </p>
 
-          <SectionHeader tag="#0.1" label="The 5 steps" meta="2 min to play" />
-          <div className="flex flex-col gap-3 mb-12">
+          <SectionHeader tag="#0.1" label="See it in action" meta="example" />
+          <div className="panel p-5 sm:p-6 mb-10">
+            <Infographic />
+          </div>
+
+          <SectionHeader tag="#0.2" label="The hints" meta="exact vs misplaced" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
+            <Rule
+              kind="exact"
+              title="Exact"
+              body="Right color, right position. You nailed that slot."
+            />
+            <Rule
+              kind="misplaced"
+              title="Misplaced"
+              body="Right color, wrong position. The color is in the answer, just not where you put it."
+            />
+          </div>
+
+          <SectionHeader tag="#0.3" label="Quick steps" meta="2 min to play" />
+          <div className="flex flex-col gap-3 mb-10">
             <Step
               n="01"
               title="Connect a Solana wallet"
-              body="Click Connect Wallet, top right. Phantom or Solflare both work. Your wallet is your identity here, no email or password needed. Every guess is signed by it, and the leaderboard tracks your wallet address."
-              note="You'll need a tiny bit of devnet SOL for transaction fees. Free from the Solana faucet."
+              body="Click Connect Wallet. Phantom or Solflare both work. We never ask for your seed phrase."
             />
             <Step
               n="02"
-              title="Start today's puzzle"
-              body="If today's puzzle hasn't been started yet, the button reads Initialize today's puzzle. Click it. Arcium generates a fresh 4-color code that nobody, you, us, anyone, can read. Once it's running, everyone in the world is playing the same one until midnight."
-              note="Anyone can start it. The first to click triggers the generation; everyone else just plays."
-            />
-            <Step
-              n="03"
               title="Pick four colors"
-              body="Tap a slot in the active row, then click a color from the palette. Fill all four slots. Hit Clear to redo the row, or just tap a slot to overwrite it."
+              body="Tap a slot in the active row, then click a color. Fill all four slots."
               extra={<PaletteRow />}
             />
             <Step
-              n="04"
-              title="Submit the guess"
-              body="Once all four slots are filled, the button changes to Submit guess. Click it and your wallet signs the transaction. Your guess is encrypted before it leaves your browser. Arcium compares it to the answer without ever seeing either side in plain text, then sends back a score."
-              note="Takes about 10-30 seconds. The button shows Computing in MPC… while you wait."
-            />
-            <Step
-              n="05"
-              title="Read the score, repeat, solve"
-              body="Each finalized guess shows pegs on the right. Green = right color, right spot. Purple = right color, wrong spot. No peg = that color isn't in the code. You have 10 guesses to get 4 greens. When you solve it, Arcium reveals the code and your score lands on the leaderboard."
-              extra={<FeedbackExample />}
+              n="03"
+              title="Submit and read the hints"
+              body="Hit Submit. After about 10-30 seconds, you'll see your score: how many colors are exact, how many are misplaced. Repeat until you crack it."
             />
           </div>
 
-          <SectionHeader tag="#0.2" label="Reading the feedback" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-12">
-            <FeedbackLegend
-              kind="exact"
-              title="Exact"
-              body="Right symbol, right slot. Lock it in. These don't move."
-            />
-            <FeedbackLegend
-              kind="misplaced"
-              title="Misplaced"
-              body="Right symbol, wrong slot. The color exists somewhere in the code, just not where you put it."
-            />
-            <FeedbackLegend
-              kind="empty"
-              title="No peg"
-              body="Symbol isn't in the code at all. Cross that color off your list."
-            />
-          </div>
-
-          <SectionHeader tag="#0.3" label="Tips" meta="strategy" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-12">
+          <SectionHeader tag="#0.4" label="Tips" meta="strategy" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
             <Tip
-              title="Open with information, not intuition"
-              body="Your first guess can't win, use it to learn. Try four different colors to find out which two or three are in the code. Knuth's classic Mastermind opener is to start with two pairs of distinct colors."
+              title="Start with variety"
+              body="Use four different colors on your first guess. You'll learn which colors are in the code."
             />
             <Tip
-              title="Track exacts vs. misplaced separately"
-              body="If you swap two slots in your next guess and exact + misplaced stays the same, you learned which slot a color belongs to. Small swaps reveal a lot."
+              title="Use the hints together"
+              body="3 exact + 0 misplaced means three slots are perfect and the fourth is a color not in the code at all."
             />
             <Tip
               title="The code can repeat colors"
-              body="Codes are 4 symbols drawn (with replacement) from 6 colors. RED-RED-BLUE-BLUE is a valid code. If you see a high misplaced count with only one color, you might be looking at a repeat."
+              body="A code like RED-RED-BLUE-BLUE is allowed. If you see lots of misplaced for one color, expect repeats."
             />
             <Tip
-              title="Time is the tiebreaker"
-              body="On the leaderboard, fewer guesses wins first. If two players are tied on guesses, the faster solve wins. Don't rush the first guess. The information matters more than the seconds."
+              title="Speed matters for ties"
+              body="Fewer guesses always wins. If two players tie on guesses, the faster one wins."
             />
           </div>
 
-          <SectionHeader tag="#0.4" label="What stays secret" meta="privacy" />
-          <div className="panel p-5 mb-12">
+          <SectionHeader tag="#0.5" label="Why this is fair" meta="under the hood" />
+          <div className="panel p-5 mb-10">
+            <p className="text-[14px] text-text-mute leading-relaxed mb-4">
+              The answer is hidden using Arcium, an encrypted compute network on
+              Solana. Here&apos;s what that actually means for you:
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <PrivacyPoint
-                title="The daily code"
-                body="On Solana as encrypted bytes. Only the network as a whole can read it, and only when someone solves it. Not even we can peek."
+                title="The answer is hidden"
+                body="Nobody can see today's code. Not the developers, not anyone. It stays hidden until someone solves it."
               />
               <PrivacyPoint
-                title="Your guess"
-                body="Encrypted in your browser before it goes anywhere. The chain just stores scrambled bytes. Other players can't see what you picked."
+                title="Your guesses are private"
+                body="Other players can't see what colors you picked. Only your score is public."
               />
               <PrivacyPoint
-                title="Public (by design)"
-                body="Your wallet, your score per guess, your time to solve. Same as a Mastermind board where everyone sees the pegs but not your secret."
+                title="The score is the only reveal"
+                body="After each guess, you only see how close you got. The full code is revealed only when someone solves it."
               />
             </div>
           </div>
 
-          <SectionHeader tag="#0.5" label="FAQ" />
-          <div className="flex flex-col gap-3 mb-12">
+          <SectionHeader tag="#0.6" label="FAQ" />
+          <div className="flex flex-col gap-3 mb-10">
             <FAQ
               q="Do I need to download anything?"
               a="No. Just a Solana wallet browser extension (Phantom or Solflare). Everything else runs in the browser."
             />
             <FAQ
               q="Does it cost money?"
-              a="On devnet, basically no. You'll spend a few cents worth of devnet SOL on transaction fees, and devnet SOL is free from the faucet. On mainnet, each guess would cost fractions of a cent."
+              a="On devnet, basically no. You'll spend a few cents worth of devnet SOL on transaction fees, and devnet SOL is free from the Solana faucet."
             />
             <FAQ
-              q="What if my guess transaction fails?"
-              a="If your wallet rejects it or the network drops it, nothing is recorded. Just try again. The only edge case: if the cluster aborts mid-computation, your attempt sits unfinalized and you can submit a new one."
+              q="What happens when someone solves it?"
+              a="The puzzle is over for the day. The answer is revealed, the winner goes on the leaderboard, and a new puzzle starts at midnight UTC."
             />
             <FAQ
               q="Can I see other players' guesses?"
-              a="No. Their guesses are scrambled too. All you can see is their score per guess, same as you."
-            />
-            <FAQ
-              q="What if the puzzle isn't solved by midnight UTC?"
-              a="A new one starts. The old code stays encrypted forever, unless someone goes back and solves it later (the contract still allows it)."
+              a="No. Only their score per guess is public, same as you."
             />
             <FAQ
               q="Why six colors and four positions?"
-              a="6 colors and 4 slots gives you 1,296 possible codes. With 10 guesses you'll usually win. Same setup as the Mastermind board game, and that's been tuned for fun for 50 years."
+              a="6 colors and 4 slots gives 1,296 possible codes. With 10 guesses you'll usually win. Same setup as the Mastermind board game."
             />
           </div>
 
@@ -171,17 +154,165 @@ export default function HowToPlay() {
   );
 }
 
+function Infographic() {
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Secret code row */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <span
+          className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim shrink-0"
+          style={{ minWidth: 96 }}
+        >
+          Secret code
+        </span>
+        <div className="flex gap-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex items-center justify-center font-mono text-[16px] text-accent-soft"
+              style={{
+                width: 38,
+                height: 38,
+                border: "1px dashed var(--line-accent)",
+                background: "rgba(167,139,250,0.04)",
+              }}
+            >
+              ?
+            </div>
+          ))}
+        </div>
+        <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim flex-1 min-w-[120px]">
+          (hidden)
+        </span>
+      </div>
+
+      <div className="hairline-t" />
+
+      {/* Player guess rows */}
+      <div className="flex flex-col gap-3">
+        <ExampleGuess
+          symbols={[0, 3, 1, 4]}
+          exact={1}
+          misplaced={1}
+          note="1 color in right spot, 1 in wrong spot, 2 not in code"
+        />
+        <ExampleGuess
+          symbols={[5, 3, 2, 4]}
+          exact={2}
+          misplaced={0}
+          note="2 colors in right spot, 2 not in code"
+        />
+        <ExampleGuess
+          symbols={[5, 3, 2, 1]}
+          exact={4}
+          misplaced={0}
+          note="All 4 right. Solved!"
+          solved
+        />
+      </div>
+
+      <div className="hairline-t" />
+
+      {/* Legend */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12.5px]">
+        <div className="flex items-center gap-2">
+          <span
+            className="peg-exact"
+            style={{ width: 11, height: 11, borderRadius: "50%", display: "inline-block" }}
+          />
+          <span className="text-text-mute">
+            <span className="text-text font-medium">Green peg</span> = right color, right position
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="peg-misplaced"
+            style={{ width: 11, height: 11, borderRadius: "50%", display: "inline-block" }}
+          />
+          <span className="text-text-mute">
+            <span className="text-text font-medium">Purple peg</span> = right color, wrong position
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExampleGuess({
+  symbols,
+  exact,
+  misplaced,
+  note,
+  solved,
+}: {
+  symbols: number[];
+  exact: number;
+  misplaced: number;
+  note: string;
+  solved?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <span
+        className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim shrink-0"
+        style={{ minWidth: 96 }}
+      >
+        Your guess
+      </span>
+      <div className="flex gap-2">
+        {symbols.map((s, i) => (
+          <ColorSymbol key={i} index={s} size={38} />
+        ))}
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <FeedbackPegs exact={exact} misplaced={misplaced} />
+        <span
+          className={`font-mono text-[11px] ${solved ? "text-green" : "text-text-mute"}`}
+        >
+          {exact}E · {misplaced}M
+        </span>
+      </div>
+      <span className="text-[11.5px] text-text-mute flex-1 min-w-[140px] leading-snug">
+        {note}
+      </span>
+    </div>
+  );
+}
+
+function Rule({
+  kind,
+  title,
+  body,
+}: {
+  kind: "exact" | "misplaced";
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="panel p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className={kind === "exact" ? "peg-exact" : "peg-misplaced"}
+          style={{ width: 12, height: 12, borderRadius: "50%", display: "inline-block" }}
+        />
+        <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-mute">
+          {title}
+        </span>
+      </div>
+      <p className="text-[13px] text-text-mute leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
 function Step({
   n,
   title,
   body,
-  note,
   extra,
 }: {
   n: string;
   title: string;
   body: string;
-  note?: string;
   extra?: React.ReactNode;
 }) {
   return (
@@ -198,12 +329,6 @@ function Step({
         <h3 className="text-[18px] tracking-tight font-medium">{title}</h3>
         <p className="text-[14px] text-text-mute leading-relaxed">{body}</p>
         {extra ? <div className="mt-1">{extra}</div> : null}
-        {note ? (
-          <div className="font-mono text-[11px] tracking-[0.05em] text-text-dim flex items-start gap-2 mt-1">
-            <span className="text-accent">↳</span>
-            <span>{note}</span>
-          </div>
-        ) : null}
       </div>
     </div>
   );
@@ -220,62 +345,6 @@ function PaletteRow() {
           </span>
         </div>
       ))}
-    </div>
-  );
-}
-
-function FeedbackExample() {
-  return (
-    <div className="panel-2 p-4 flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <span className="section-tag w-6 text-right">01</span>
-        <div className="flex gap-2">
-          <ColorSymbol index={0} size={28} />
-          <ColorSymbol index={3} size={28} />
-          <ColorSymbol index={1} size={28} />
-          <ColorSymbol index={4} size={28} />
-        </div>
-        <div className="flex-1" />
-        <FeedbackPegs exact={1} misplaced={2} />
-        <span className="font-mono text-[11px] text-text-dim min-w-[64px] text-right">
-          1E · 2M
-        </span>
-      </div>
-      <div className="font-mono text-[10.5px] tracking-[0.05em] text-text-dim">
-        ↳ Read this as: one symbol is exact, two more are right colors but in
-        the wrong slots, and one is not in the code at all.
-      </div>
-    </div>
-  );
-}
-
-function FeedbackLegend({
-  kind,
-  title,
-  body,
-}: {
-  kind: "exact" | "misplaced" | "empty";
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="panel p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <span
-          className={
-            kind === "exact"
-              ? "peg-exact"
-              : kind === "misplaced"
-                ? "peg-misplaced"
-                : "peg-empty"
-          }
-          style={{ width: 11, height: 11, borderRadius: "50%", display: "inline-block" }}
-        />
-        <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-mute">
-          {title}
-        </span>
-      </div>
-      <p className="text-[13px] text-text-mute leading-relaxed">{body}</p>
     </div>
   );
 }

@@ -337,12 +337,10 @@ export default function Page() {
             ) : null}
             <Section tag="#0.1" label="Objective" meta="onchain · solana">
               <p className="text-[14px] text-text-mute leading-relaxed">
-                Crack today&apos;s 4-color code in {MAX_ATTEMPTS} guesses. After
-                each one, you get a score:{" "}
-                <span className="text-text">exact</span> (right color, right
-                spot) and <span className="text-text">misplaced</span> (right
-                color, wrong spot). The code itself stays encrypted until
-                someone cracks it.
+                Guess the 4-color code in {MAX_ATTEMPTS} tries. After each
+                guess, see how many colors are{" "}
+                <span className="text-text">exactly right</span> and how many
+                are <span className="text-text">misplaced</span>.
               </p>
             </Section>
 
@@ -351,6 +349,11 @@ export default function Page() {
               label="Guesses"
               meta={`${attempts.length} / ${MAX_ATTEMPTS}`}
             >
+              {attempts.length === 0 && puzzle.state === "Active" ? (
+                <p className="text-[12.5px] text-text-mute mb-3">
+                  Pick 4 colors below, then submit your first guess.
+                </p>
+              ) : null}
               <div className="panel">
                 <GuessBoard
                   attempts={boardAttempts}
@@ -362,7 +365,7 @@ export default function Page() {
                 />
               </div>
               <div className="mt-4 panel p-4 flex items-center gap-4 flex-wrap">
-                <span className="section-tag">Palette</span>
+                <span className="section-tag">Colors</span>
                 <ColorPicker
                   selectedIndex={pendingSymbols[activeSlot] ?? null}
                   onSelect={chooseSymbol}
@@ -388,27 +391,24 @@ export default function Page() {
               </div>
             </Section>
 
-            <Section tag="#0.3" label="Privacy" meta="MPC · Arcium">
-              <p className="text-[14px] text-text-mute leading-relaxed mb-4">
-                Cryptanalyst is fair by math. Here&apos;s how:
-              </p>
+            <Section tag="#0.3" label="Why this is fair" meta="no cheating">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <PrivacyCard
-                  title="Nobody knows the answer"
-                  body="Today's code was generated inside Arcium's encrypted compute network. Not even the developers, the validators, or Arcium itself can read it as a single piece."
+                  title="The answer is hidden"
+                  body="Nobody can see today's code. Not the developers, not anyone. It stays hidden until someone solves it."
                 />
                 <PrivacyCard
-                  title="Your guess is scrambled"
-                  body="Your browser encrypts every guess before it goes anywhere. Arcium compares it to the answer without either side ever showing up in plain text."
+                  title="Your guesses stay private"
+                  body="Other players can't see what colors you picked. Only your score is public."
                 />
                 <PrivacyCard
                   title="You only see the score"
-                  body="After each guess you get how many colors are exactly right and how many are misplaced. The full answer only appears once someone cracks all four."
+                  body="After each guess, you get hints, not the answer. The full code is revealed only when someone cracks it."
                 />
               </div>
             </Section>
 
-            <Section tag="#0.4" label="Symbols" meta="6 colors · 1296 codes">
+            <Section tag="#0.4" label="Available colors" meta="pick from these">
               <div className="panel p-4 flex flex-wrap gap-3 items-center">
                 {SYMBOL_PALETTE.map((p, i) => (
                   <div key={i} className="flex items-center gap-2">
@@ -437,7 +437,7 @@ export default function Page() {
               <div className="panel p-0 overflow-hidden">
                 {log.length === 0 ? (
                   <div className="p-4 font-mono text-[11px] tracking-[0.16em] uppercase text-text-dim">
-                    No activity yet. Submit a guess to see live logs.
+                    Be the first to submit a guess.
                   </div>
                 ) : (
                   <div className="max-h-[360px] overflow-y-auto">

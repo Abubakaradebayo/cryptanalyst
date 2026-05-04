@@ -74,11 +74,11 @@ export function PuzzleCard({
       </div>
 
       <h2 className="text-[28px] leading-[1.1] font-medium mb-2 tracking-tight">
-        Daily Cipher
+        Crack Today&apos;s Code
       </h2>
       <p className="text-text-mute text-[13px] mb-3 max-w-[36ch] leading-relaxed">
-        Be the first to crack today&apos;s 4-color code. The answer is encrypted
-        by Arcium, nobody can read it until someone solves it.
+        Guess the secret 4-color code in 10 tries. After each guess, you get
+        hints. The answer is hidden until someone solves it.
       </p>
       {state === "Active" && !exhausted ? (
         <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent mb-5 flex items-center gap-2">
