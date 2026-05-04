@@ -77,8 +77,7 @@ export function PuzzleCard({
         Crack Today&apos;s Code
       </h2>
       <p className="text-text-mute text-[13px] mb-3 max-w-[36ch] leading-relaxed">
-        Guess the secret 4-color code in 10 tries. After each guess, you get
-        hints. The answer is hidden until someone solves it.
+        Guess the 4-color code in 10 tries. You get hints after each guess.
       </p>
       {state === "Active" && !exhausted ? (
         <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent mb-5 flex items-center gap-2">

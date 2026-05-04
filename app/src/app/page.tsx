@@ -337,10 +337,8 @@ export default function Page() {
             ) : null}
             <Section tag="#0.1" label="Objective" meta="onchain · solana">
               <p className="text-[14px] text-text-mute leading-relaxed">
-                Guess the 4-color code in {MAX_ATTEMPTS} tries. After each
-                guess, see how many colors are{" "}
-                <span className="text-text">exactly right</span> and how many
-                are <span className="text-text">misplaced</span>.
+                Guess the 4-color code in {MAX_ATTEMPTS} tries. You get hints
+                after each guess.
               </p>
             </Section>
 
