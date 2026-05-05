@@ -54,11 +54,11 @@ export default function Leaderboard() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 page-fade">
-        <div className="max-w-[960px] mx-auto px-6 pt-8 pb-12">
+        <div className="max-w-[960px] mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-12">
           <SectionHeader
             tag="#0.0"
             label="Leaderboard"
-            meta={tab === "today" ? `day · ${today}` : "all-time"}
+            meta={tab === "today" ? formatPuzzleDate(today) : "all-time"}
           />
           <div className="flex gap-2 mb-6">
             <Tab active={tab === "today"} onClick={() => setTab("today")}>
@@ -69,13 +69,13 @@ export default function Leaderboard() {
             </Tab>
           </div>
 
-          <div className="panel">
-            <div className="grid grid-cols-[40px_1fr_120px_120px_120px] section-tag px-4 py-3 hairline-b">
+          <div className="panel overflow-hidden">
+            <div className="grid grid-cols-[28px_1fr_56px_72px] sm:grid-cols-[40px_1fr_100px_100px_120px] section-tag px-3 sm:px-4 py-3 hairline-b gap-2 sm:gap-3">
               <span>#</span>
               <span>Player</span>
-              <span className="text-right">Guesses</span>
+              <span className="text-right">Guess</span>
               <span className="text-right">Time</span>
-              <span className="text-right">Date</span>
+              <span className="text-right hidden sm:block">Date</span>
             </div>
 
             {loading ? (
@@ -90,19 +90,21 @@ export default function Leaderboard() {
               filtered.map((r, i) => (
                 <div
                   key={`${r.player}-${r.date}`}
-                  className="grid grid-cols-[40px_1fr_120px_120px_120px] px-4 py-3 hairline-b text-[13px] items-center"
+                  className="grid grid-cols-[28px_1fr_56px_72px] sm:grid-cols-[40px_1fr_100px_100px_120px] px-3 sm:px-4 py-3 hairline-b text-[13px] items-center gap-2 sm:gap-3"
                 >
                   <span className="font-mono text-[11px] text-text-dim">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="font-mono text-[12px] truncate">
+                  <span className="font-mono text-[11px] sm:text-[12px] truncate">
                     {abbrev(r.player)}
                   </span>
-                  <span className="font-mono text-right">{r.guessesTaken}</span>
-                  <span className="font-mono text-right">
+                  <span className="font-mono text-right text-[12px] sm:text-[13px]">
+                    {r.guessesTaken}
+                  </span>
+                  <span className="font-mono text-right text-[12px] sm:text-[13px]">
                     {formatDuration(r.timeToSolveSecs)}
                   </span>
-                  <span className="font-mono text-right text-text-dim">
+                  <span className="font-mono text-right text-text-dim hidden sm:block">
                     {formatPuzzleDate(r.date)}
                   </span>
                 </div>
