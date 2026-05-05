@@ -500,7 +500,7 @@ function ShareWinButton({
   const m = Math.floor(timeSecs / 60);
   const s = timeSecs % 60;
   const time = m > 0 ? `${m}m ${s}s` : `${s}s`;
-  const text = `I cracked today's Cryptanalyst in ${guesses} guess${guesses === 1 ? "" : "es"} (${time}). The answer is encrypted by @Arcium MPC, nobody can read it until someone solves it.\n\nTry it: https://cryptanalyst.vercel.app`;
+  const text = `I cracked today's Cryptanalyst in ${guesses} guess${guesses === 1 ? "" : "es"} (${time}). The answer is encrypted by @Arcium MPC, nobody can read it until someone solves it.\n\nTry it: https://cryptanalyst.xyz`;
   const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
   return (
     <a

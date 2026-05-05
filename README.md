@@ -36,20 +36,29 @@ Many privacy projects could have shipped with zk or TEEs. Cryptanalyst cannot. T
 
 ## Live deployment status
 
-Everything in this submission is real, verifiable on-chain, and ready to run end-to-end as soon as Arcium devnet cluster 456 is back online (the Arcium team confirmed an outage and is working on the fix).
+End-to-end working on Solana devnet. Live frontend, real on-chain transactions, real MPC computations, real callbacks landing.
 
 | Component | Status | Address / proof |
 | --- | --- | --- |
-| Anchor program (built with `arcium-anchor 0.9.6`) | Deployed | [`EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4`](https://explorer.solana.com/address/EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4?cluster=devnet) |
-| MXE account | Active, all keys set (x25519, Ed25519, ElGamal, BLS) | [`6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD`](https://explorer.solana.com/address/6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD?cluster=devnet) |
-| MPC cluster | Devnet cluster `456` (the canonical Arcium devnet cluster) | currently in maintenance, per Arcium team |
-| `gen_code` comp_def | Initialized, uploaded, finalized | offset `2971492714` |
-| `evaluate_guess` comp_def | Initialized, uploaded, finalized | offset `3364063154` |
-| `reveal_code` comp_def | Initialized, uploaded, finalized | offset `206090300` |
-| Frontend | Live locally | `cd app && npm run dev` |
-| End-to-end gameplay | Awaiting cluster restoration | once cluster 456 returns, no code change needed on our side |
+| Anchor program (`arcium-anchor 0.9.6`) | Deployed | [`EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4`](https://explorer.solana.com/address/EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4?cluster=devnet) |
+| MXE account | Active, all keys set | [`6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD`](https://explorer.solana.com/address/6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD?cluster=devnet) |
+| MPC cluster | Devnet cluster `456` | Active |
+| `gen_code_v2` comp_def | Live | offset `2971492714` |
+| `evaluate_guess_v2` comp_def | Live | offset `3364063154` |
+| `reveal_code` comp_def | Live | offset `206090300` |
+| Frontend | Public | [https://cryptanalyst.xyz](https://cryptanalyst.xyz) |
 
-The code, deployment, and on-chain state are correct. The only outstanding gate is operational on the Arcium devnet side, not the integration itself. Verifiable from any RPC client without our cooperation.
+### Notable transactions (verifiable on Solana Explorer)
+
+| Action | Tx hash |
+| --- | --- |
+| `InitDailyPuzzle` (CPI to Arcium scheduler) | [`3kcN2vCPt73Ukx2Fnk9DiuKCdFKGwEYZdL6g9XxC6k3ACC16aBs5k5bVFYjU2g5xHKNcUK1asfjZAvcuboLAT6Uq`](https://explorer.solana.com/tx/3kcN2vCPt73Ukx2Fnk9DiuKCdFKGwEYZdL6g9XxC6k3ACC16aBs5k5bVFYjU2g5xHKNcUK1asfjZAvcuboLAT6Uq?cluster=devnet) |
+| `GenCodeV2Callback` (encrypted code written) | [`3EBzypKmKn7zHGWXcgxD1Bq1THnYAKVuEnrtrFXNxu8EqdA57qiZ5yWPss2GjsBQFformzFABiiGNaga9agWhRqS`](https://explorer.solana.com/tx/3EBzypKmKn7zHGWXcgxD1Bq1THnYAKVuEnrtrFXNxu8EqdA57qiZ5yWPss2GjsBQFformzFABiiGNaga9agWhRqS?cluster=devnet) |
+| `SubmitGuess` (CPI: encrypted guess → Arcium) | [`3c7Qrp5X3VtFgQMqycPZHSjYtHxZfEm3VDr3qujK3m8D6JPNd987sELypXYCh2JvEmrE6M7Efbmxn6spPpmNwmX6`](https://explorer.solana.com/tx/3c7Qrp5X3VtFgQMqycPZHSjYtHxZfEm3VDr3qujK3m8D6JPNd987sELypXYCh2JvEmrE6M7Efbmxn6spPpmNwmX6?cluster=devnet) |
+| `EvaluateGuessV2Callback` (BLS-signed feedback) | [`5ZCgEZXpv1v214cPSm5ovuMJyebo4S54xM3kS9JAtrkuRYM7juG354nSYNKVNUuEoCYQPwLjxojAd4UAPMm3bPTX`](https://explorer.solana.com/tx/5ZCgEZXpv1v214cPSm5ovuMJyebo4S54xM3kS9JAtrkuRYM7juG354nSYNKVNUuEoCYQPwLjxojAd4UAPMm3bPTX?cluster=devnet) |
+| Program upgrade (added on-chain plaintext guess) | [`2vuRugzgQtT1MfvsspAWKLtEJzsSGXvaFdZNsk6xtY2gqoCw29WiNjpcnrsHHoAfeE4cHD4iDwBLPo8R7abFoqD1`](https://explorer.solana.com/tx/2vuRugzgQtT1MfvsspAWKLtEJzsSGXvaFdZNsk6xtY2gqoCw29WiNjpcnrsHHoAfeE4cHD4iDwBLPo8R7abFoqD1?cluster=devnet) |
+
+Every claim in this README is verifiable on chain by any RPC client without our cooperation.
 
 ---
 
@@ -212,6 +221,22 @@ If you're testing locally, point `NEXT_PUBLIC_RPC_ENDPOINT` at your local valida
 
 ---
 
+## Testing
+
+End-to-end test suite at [`tests/cryptanalyst.ts`](tests/cryptanalyst.ts) covers the three critical flows:
+
+1. **Initializes all three comp defs** (`gen_code_v2`, `evaluate_guess_v2`, `reveal_code`)
+2. **Generates today's daily puzzle** via `gen_code` and verifies the `DailyPuzzle` PDA holds non-zero ciphertext
+3. **Submits a guess and receives valid feedback** with `(exact + misplaced ≤ 4)` from a real MPC computation
+
+```bash
+anchor test
+```
+
+> **Known limitation:** the test runs against `arcium localnet` which requires the 0.9.x callback-server Docker image. Arcium has not yet published this image, so localnet runs are temporarily blocked. The same flows are validated end-to-end against devnet cluster `456` — see the **Notable transactions** table above for verifiable on-chain evidence.
+
+---
+
 ## Design notes
 
 ### Bias-free randomness
@@ -232,14 +257,35 @@ The code is stored on chain as `[[u8; 32]; 4]` ciphertext + `state_nonce: u128`,
 
 ---
 
-## Out of scope for MVP
+## Roadmap
 
-- 1v1 PvP racing mode
-- Streaks / NFT badges
-- Difficulty levels (locked at 4 symbols × 6 colors)
-- Account abstraction / gasless guesses
-- Off-chain database. Everything is on chain; no Postgres, no Firebase
-- Auth beyond wallet connect
+### Shipped (this RTG submission)
+
+- 4-color daily code-breaking puzzle on Solana devnet
+- Three Arcis circuits running in production: `gen_code_v2`, `evaluate_guess_v2`, `reveal_code`
+- On-chain plaintext guess storage so player history survives any localStorage wipe
+- Per-player streak counter, /wins page, leaderboard
+- Twitter share button on solve
+- Mobile-responsive, welcome modal for first-time users
+
+### Next 2-4 weeks (post-judging, before mainnet)
+
+- **NFT trophies on solve** — Metaplex-compressed cNFT minted automatically on `claim_solve`. Image generated dynamically from the date + the colors. Cheap (~0.001 SOL per mint) and shows up in Phantom's collectibles tab.
+- **Difficulty tiers** — `Easy` (5 colors), `Standard` (6 colors), `Hard` (8 colors). Same MPC infrastructure, more replay value.
+- **Streak NFTs** — solving 7 days in a row mints a "Cryptanalyst Adept" NFT. 30-day streak mints a different one. Drives daily retention.
+
+### 1-3 months (mainnet candidates)
+
+- **PvP racing mode** — two wallets enter the same encrypted code at the same time, race to crack it. Cluster computes both players' guesses in parallel. Winner takes the pot.
+- **Coop puzzle** — 4 wallets must collectively crack a harder code, each holding partial info. Demonstrates a more advanced MPC pattern (multi-party encrypted aggregation) and creates social play.
+- **Leaderboard rewards** — small SOL prize pool funded by tx fees, distributed weekly to the top 10 by guesses + speed.
+
+### Mainnet considerations
+
+- Move from devnet cluster `456` to whatever Arcium ships as the canonical mainnet cluster
+- Upgrade RPC tier (paid Helius / Triton / QuickNode) for production load
+- Bump Anchor program mempool size from `Tiny` to `Medium` for higher throughput
+- Add CSP headers, run `npm audit`, set up dependency monitoring
 
 ---
 
