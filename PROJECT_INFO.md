@@ -24,7 +24,7 @@ Arcium RTG **Hidden-Information Games** challenge.
 
 | Component | Address |
 | --- | --- |
-| **Live URL** | https://cryptanalyst.xyz |
+| **Live URL** | https://cryptanalyst.vercel.app |
 | **Program ID** | `EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4` |
 | **MXE account** | `6ym4Tr9NcVkMMAstdcgH9WRd4R13717gB4GTq13RNStD` |
 | **Arcium scheduler** | `Arcj82pX7HxYKLR92qvgZUAd7vGS1k4hQvAFcPATFdEQ` (Arcium-owned, devnet) |

@@ -46,7 +46,7 @@ End-to-end working on Solana devnet. Live frontend, real on-chain transactions, 
 | `gen_code_v2` comp_def | Live | offset `2971492714` |
 | `evaluate_guess_v2` comp_def | Live | offset `3364063154` |
 | `reveal_code` comp_def | Live | offset `206090300` |
-| Frontend | Public | [https://cryptanalyst.xyz](https://cryptanalyst.xyz) |
+| Frontend | Public | [https://cryptanalyst.vercel.app](https://cryptanalyst.vercel.app) |
 
 ### Notable transactions (verifiable on Solana Explorer)
 
