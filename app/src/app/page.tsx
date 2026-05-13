@@ -384,7 +384,7 @@ export default function Page() {
             >
               {attempts.length === 0 && puzzle.state === "Active" ? (
                 <p className="text-[13px] text-text-mute mb-3">
-                  Pick four symbols, submit, then wait for the MPC cluster to return your clues.
+                  Pick four symbols and submit. Each guess takes about 10-30s while the MPC cluster computes your clues.
                 </p>
               ) : null}
               <div className="board-panel overflow-hidden">

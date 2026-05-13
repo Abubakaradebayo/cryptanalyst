@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
 import { WelcomeModal } from "@/components/WelcomeModal";
@@ -10,10 +11,43 @@ const spaceMono = Space_Mono({
   weight: ["400", "700"],
 });
 
+const siteUrl = "https://cryptanalyst.vercel.app";
+const siteTitle = "Cryptanalyst - Crack today's sealed code";
+const siteDescription =
+  "Guess the 4-color code in 10 tries. The answer is sealed inside Arcium's MPC network. Nobody can read it until someone solves it.";
+
 export const metadata: Metadata = {
-  title: "Cryptanalyst - Daily MPC Cipher",
-  description:
-    "Wordle, but provably fair via MPC. The daily code is generated inside the Arcium cluster. Nobody knows the answer until someone solves it.",
+  metadataBase: new URL(siteUrl),
+  title: siteTitle,
+  description: siteDescription,
+  applicationName: "Cryptanalyst",
+  authors: [{ name: "Abdulsalam Abubakar" }],
+  keywords: [
+    "Arcium",
+    "MPC",
+    "Solana",
+    "Mastermind",
+    "encrypted",
+    "puzzle",
+    "code-breaking",
+    "onchain game",
+  ],
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    title: siteTitle,
+    description: siteDescription,
+    siteName: "Cryptanalyst",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+    creator: "@Arcium",
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -24,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <WelcomeModal />
         </WalletProvider>
+        <Analytics />
       </body>
     </html>
   );
