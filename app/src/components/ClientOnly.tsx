@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Avoids SSR/CSR hydration mismatches when wallet-adapter mutates the DOM.
 export function ClientOnly({
   children,
   fallback = null,

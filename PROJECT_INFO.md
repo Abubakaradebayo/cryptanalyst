@@ -1,10 +1,10 @@
-# Cryptanalyst — Quick Reference
+# Cryptanalyst - Quick Reference
 
 One-page summary of the live deployment. Share this when anyone asks for project details.
 
 ## Pitch
 
-A daily 4-symbol code-breaking puzzle on Solana, powered by Arcium MPC. The answer is generated inside the MPC cluster and is mathematically inaccessible to anyone — developers included — until a player solves it on chain.
+A daily 4-symbol code-breaking puzzle on Solana, powered by Arcium MPC. The answer is generated inside the MPC cluster and is mathematically inaccessible to anyone - developers included - until a player solves it on chain.
 
 > Wordle, but provably fair via MPC.
 
@@ -59,7 +59,7 @@ Arcium RTG **Hidden-Information Games** challenge.
 
 ## Privacy property (one-line pitch)
 
-The 128 bytes at byte offset 46 of the daily puzzle PDA are the encrypted answer. No party — not the developer, validators, the MXE authority, or any cluster node alone — can decrypt them. Only the Arcium MPC cluster can, collectively, and only when the program's `claim_solve` instruction fires after a player scores `(4, 0)`.
+The 128 bytes at byte offset 46 of the daily puzzle PDA are the encrypted answer. No party - not the developer, validators, the MXE authority, or any cluster node alone - can decrypt them. Only the Arcium MPC cluster can, collectively, and only when the program's `claim_solve` instruction fires after a player scores `(4, 0)`.
 
 ## Why MPC and not zk / TEE / hash / server
 
@@ -69,13 +69,13 @@ The Mastermind feedback function (`exact, misplaced`) is a comparison between tw
 
 - 4-symbol secret code drawn from 6 colors → 1296 possible codes
 - 10 guesses per puzzle, per wallet
-- Each guess returns `(exact, misplaced)` — same as physical Mastermind
+- Each guess returns `(exact, misplaced)` - same as physical Mastermind
 - Solving (4 exact, 0 misplaced) reveals the code on chain + writes a `LeaderboardEntry`
 - New puzzle at every UTC midnight
 
 ## Documents
 
-- `README.md` — main readme with setup + threat model
-- `PRESENTATION.md` — judge-facing pitch with architecture diagram + section-by-section breakdown
-- `app/src/app/how-to-play/page.tsx` — in-app player tutorial
-- `PROJECT_INFO.md` — this file
+- `README.md` - main readme with setup + threat model
+- `PRESENTATION.md` - judge-facing pitch with architecture diagram + section-by-section breakdown
+- `app/src/app/how-to-play/page.tsx` - in-app player tutorial
+- `PROJECT_INFO.md` - this file

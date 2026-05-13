@@ -31,17 +31,17 @@ export function GuessRow({
 
   return (
     <div
-      className={`flex items-center gap-3 py-2 px-3 hairline-b ${active ? "bg-white/[0.015]" : ""}`}
+      className={`guess-row flex items-center gap-2 sm:gap-3 py-2.5 px-3 sm:px-4 hairline-b ${active ? "bg-white/[0.035]" : ""}`}
     >
-      <span className="section-tag w-6 text-right">
+      <span className="section-tag w-6 text-right shrink-0">
         {String(index + 1).padStart(2, "0")}
       </span>
-      <div className="flex gap-2">
+      <div className="flex gap-2 shrink-0">
         {padded.map((sym, i) => (
           <ColorSymbol
             key={i}
             index={sym}
-            size={32}
+            size={34}
             selected={active && activeSlot === i}
             onClick={onSlotClick ? () => onSlotClick(i) : undefined}
             pulse={computing}
@@ -50,16 +50,21 @@ export function GuessRow({
       </div>
       <div className="flex-1" />
       {finalized && exact !== undefined && misplaced !== undefined ? (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <FeedbackPegs exact={exact} misplaced={misplaced} />
-          <span className="font-mono text-[11px] text-text-dim min-w-[64px] text-right">
+          <span className="hidden sm:inline font-mono text-[11px] text-text-dim min-w-[64px] text-right">
             {exact}E · {misplaced}M
           </span>
         </div>
       ) : computing ? (
-        <LoadingPill label="MPC computing" sublabel="encrypted compare" />
+        <>
+          <span className="sm:hidden section-tag text-accent-soft">MPC</span>
+          <span className="hidden sm:inline-flex">
+            <LoadingPill label="MPC computing" sublabel="encrypted compare" />
+          </span>
+        </>
       ) : active ? (
-        <span className="section-tag">awaiting input</span>
+        <span className="hidden sm:inline section-tag">awaiting input</span>
       ) : null}
     </div>
   );

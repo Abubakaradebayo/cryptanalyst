@@ -22,9 +22,6 @@ function computeStreak(wins: Win[], today: number): number {
   if (wins.length === 0) return 0;
   const dates = new Set(wins.map((w) => w.date));
   let streak = 0;
-  // Start from today, walk backward as long as each day was solved.
-  // If today wasn't solved, start from yesterday so an in-progress day
-  // doesn't reset the streak.
   let cursor = dates.has(today) ? today : today - 1;
   while (dates.has(cursor)) {
     streak += 1;

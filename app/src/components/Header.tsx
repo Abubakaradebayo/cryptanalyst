@@ -11,7 +11,7 @@ export function Header() {
   const walletBusy = connecting || disconnecting;
 
   return (
-    <header className="hairline-b">
+    <header className="site-header hairline-b sticky top-0 z-30 backdrop-blur-xl">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-8">
         <Link href="/" className="flex items-center gap-2 group shrink-0">
           <span className="group-hover:[&>svg]:animate-[flower-spin_1.4s_linear_infinite]">

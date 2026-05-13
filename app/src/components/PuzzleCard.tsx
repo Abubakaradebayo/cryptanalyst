@@ -57,27 +57,24 @@ export function PuzzleCard({
 
   const isComputing = state === "Generating" || state === "Loading";
 
-  // Determine what to show in the 4 code slots:
-  //   - Solved -> revealed answer colors
-  //   - otherwise -> "?" placeholders (the code is encrypted on chain)
   const slots: (number | null)[] =
     revealedSymbols && revealedSymbols.length === NUM_POSITIONS
       ? revealedSymbols
       : Array.from({ length: NUM_POSITIONS }, () => null);
 
   return (
-    <div className="panel p-6 flex flex-col" style={{ minHeight: 580 }}>
+    <div className="board-panel p-5 sm:p-6 flex flex-col" style={{ minHeight: 580 }}>
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <StatusBadge variant="accent">Cryptanalyst</StatusBadge>
-        <StatusBadge variant="mute">Powered by Arcium</StatusBadge>
+        <StatusBadge variant="accent">Daily cipher</StatusBadge>
+        <StatusBadge variant="mute">Arcium MPC</StatusBadge>
         {stateBadge}
       </div>
 
-      <h2 className="text-[28px] leading-[1.1] font-medium mb-2 tracking-tight">
-        Crack Today&apos;s Code
+      <h2 className="text-[25px] sm:text-[29px] leading-[1.08] font-normal mb-3">
+        Crack today&apos;s cipher
       </h2>
-      <p className="text-text-mute text-[13px] mb-3 max-w-[36ch] leading-relaxed">
-        Guess the 4-color code in 10 tries. You get hints after each guess.
+      <p className="text-text-mute text-[13px] mb-4 max-w-[39ch] leading-relaxed">
+        The answer is generated inside Arcium MPC and stays sealed until solved.
       </p>
       {state === "Active" && !exhausted ? (
         <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent mb-5 flex items-center gap-2">
@@ -92,7 +89,7 @@ export function PuzzleCard({
               animation: "pulse-accent 1.4s ease-in-out infinite",
             }}
           />
-          First wallet to crack it wins the day
+          live puzzle open
         </div>
       ) : (
         <div className="mb-5" />
@@ -105,21 +102,21 @@ export function PuzzleCard({
         <div className="absolute top-3 left-3 flex items-center gap-2">
           <FlowerMark size={12} />
           <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-dim">
-            today&apos;s code
+            encrypted answer
           </span>
         </div>
 
         <div className="flex gap-3 mt-4">
           {slots.map((sym, i) =>
             sym !== null ? (
-              <ColorSymbol key={i} index={sym} size={48} />
+              <ColorSymbol key={i} index={sym} size={56} />
             ) : (
               <div
                 key={i}
                 className="flex items-center justify-center font-mono text-[20px] text-accent-soft"
                 style={{
-                  width: 48,
-                  height: 48,
+                  width: 56,
+                  height: 56,
                   border: "1px dashed var(--line-accent)",
                   background: "rgba(167,139,250,0.04)",
                 }}
@@ -162,7 +159,7 @@ export function PuzzleCard({
         {isComputing ? (
           <div
             className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]"
-            style={{ background: "rgba(0,0,0,0.55)" }}
+            style={{ background: "rgba(0,0,0,0.72)" }}
           >
             <LoadingFlower
               size={56}
@@ -186,12 +183,12 @@ export function PuzzleCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-px mb-5 hairline-t hairline-b">
-        <div className="panel p-3 flex flex-col gap-1">
-          <span className="section-tag">attempts</span>
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="control-strip p-3 flex flex-col gap-1">
+          <span className="section-tag">moves</span>
           <span className="font-mono text-[18px]">{attemptCount}</span>
         </div>
-        <div className="panel p-3 flex flex-col gap-1">
+        <div className="control-strip p-3 flex flex-col gap-1">
           <span className="section-tag">solvers</span>
           <span className="font-mono text-[18px]">{solvedCount}</span>
         </div>

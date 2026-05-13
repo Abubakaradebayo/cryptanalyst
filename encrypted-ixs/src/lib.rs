@@ -22,9 +22,6 @@ mod circuits {
 
     #[instruction]
     pub fn gen_code_v2() -> Enc<Mxe, DailyCode> {
-        // Simpler form: gen_uniform<u8>() avoids u128 -> u8 cast and the
-        // rejection-sampling loop that bloats bytecode. Small modulo bias
-        // (256 mod 6 != 0) is acceptable for a daily puzzle.
         let s0 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
         let s1 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
         let s2 = ArcisRNG::gen_uniform::<u8>() % NUM_SYMBOLS as u8;
@@ -41,8 +38,6 @@ mod circuits {
         let guess = guess_ctxt.to_arcis();
         let code = code_ctxt.to_arcis();
 
-        // Use a u8 array indexed by usize. Avoids the usize -> u8 cast
-        // that the old version had on color_idx.
         let colors: [u8; NUM_SYMBOLS] = [0u8, 1u8, 2u8, 3u8, 4u8, 5u8];
 
         let mut exact: u8 = 0;

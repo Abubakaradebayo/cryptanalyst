@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { FlowerMark } from "./FlowerMark";
 
 const STORAGE_KEY = "cryptanalyst:welcomed";
@@ -26,45 +27,46 @@ export function WelcomeModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center px-4 py-8 dotted-bg"
+      className="fixed inset-0 z-[200] flex items-center justify-center px-4 py-8"
       style={{
-        background: "rgba(8, 8, 12, 0.85)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(0, 0, 0, 0.88)",
+        backdropFilter: "blur(4px)",
       }}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="panel max-w-[480px] w-full p-6 sm:p-7 flex flex-col gap-5 welcome-fade"
+        className="board-panel max-w-[500px] w-full p-5 sm:p-6 flex flex-col gap-5 welcome-fade"
         style={{ borderColor: "var(--line-accent)" }}
       >
-        <div className="flex items-center gap-2">
-          <FlowerMark size={14} />
-          <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent-soft">
-            Welcome to Cryptanalyst
-          </span>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <FlowerMark size={14} />
+            <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent-soft">
+              Cryptanalyst
+            </span>
+          </div>
+          <span className="chip chip-mute">devnet</span>
         </div>
 
-        <h2 className="text-[22px] leading-[1.15] font-medium tracking-tight">
-          Before you play, a quick heads up.
+        <h2 className="text-[21px] sm:text-[24px] leading-[1.12] font-normal">
+          A quick note before the first move.
         </h2>
 
-        <ul className="flex flex-col gap-3 text-[13.5px] text-text-mute leading-relaxed">
+        <ul className="flex flex-col gap-3 text-[13px] text-text-mute leading-relaxed">
           <Bullet>
-            This runs on <span className="text-text">Solana devnet</span>, a
-            free testing network. No real money is at risk.
+            This runs on <span className="text-text">Solana devnet</span>. No
+            real money is at risk.
           </Bullet>
           <Bullet>
-            You&apos;ll connect a Solana wallet (Phantom or Solflare) to play.
-            We never ask for your seed phrase, only signatures for your
-            guesses.
+            You&apos;ll connect a wallet to play. Cryptanalyst only asks for
+            signatures, never your seed phrase.
           </Bullet>
           <Bullet>
-            Each guess costs a fraction of a cent in devnet SOL for fees.
-            Devnet SOL is free from the Solana faucet.
+            Every move is submitted onchain and evaluated by Arcium MPC.
           </Bullet>
           <Bullet>
-            Code is open source on{" "}
+            The code is open source on{" "}
             <a
               href="https://github.com/Abubakaradebayo/cryptanalyst"
               target="_blank"
@@ -77,16 +79,17 @@ export function WelcomeModal() {
           </Bullet>
         </ul>
 
-        <div className="hairline-t pt-4 flex items-center gap-3 flex-wrap">
+        <div className="control-strip p-3 flex items-center gap-3 flex-wrap">
           <button onClick={dismiss} className="btn-primary justify-center">
-            Got it, let me play <span aria-hidden>→</span>
+            Start playing <span aria-hidden>→</span>
           </button>
-          <a
+          <Link
             href="/how-to-play"
-            className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute hover:text-text"
+            onClick={dismiss}
+            className="font-mono text-[11px] tracking-[0.16em] uppercase text-text-mute hover:text-accent"
           >
             How to play
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -101,7 +104,6 @@ function Bullet({ children }: { children: React.ReactNode }) {
         style={{
           width: 5,
           height: 5,
-          borderRadius: "50%",
           background: "var(--accent)",
         }}
       />

@@ -18,7 +18,6 @@ export const SYMBOL_PALETTE: { hex: string; name: string }[] = [
 export const RPC_ENDPOINT =
   process.env.NEXT_PUBLIC_RPC_ENDPOINT ?? "https://api.devnet.solana.com";
 
-// Arcium MPC cluster offset on devnet (chosen at deploy time; see Arcium.toml).
 export const ARCIUM_CLUSTER_OFFSET = Number(
   process.env.NEXT_PUBLIC_ARCIUM_CLUSTER_OFFSET ?? "456",
 );

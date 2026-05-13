@@ -55,9 +55,6 @@ pub mod cryptanalyst {
         date: u32,
     ) -> Result<()> {
         let puzzle = &mut ctx.accounts.puzzle;
-        // Allow re-init only if the puzzle is fresh (date==0 means uninitialized
-        // since u32 default is 0) or stuck in Generating state from a failed callback.
-        // Active or Solved puzzles cannot be re-initialized for the day.
         require!(
             puzzle.date == 0 || puzzle.state == PuzzleState::Generating,
             ErrorCode::PuzzleAlreadyInitialized
@@ -652,9 +649,6 @@ pub struct PlayerAttempt {
     pub misplaced: u8,
     pub finalized: bool,
     pub submitted_at: i64,
-    // Plaintext guess for on-chain display. The cluster never sees this in
-    // plaintext; it's only here so the frontend can render the player's own
-    // guess history without depending on browser localStorage.
     pub guess_symbols: [u8; 4],
 }
 

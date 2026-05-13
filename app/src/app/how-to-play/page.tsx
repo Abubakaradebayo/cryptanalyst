@@ -26,7 +26,6 @@ export default function HowToPlay() {
             You get hints after each guess.
           </p>
 
-          {/* Example */}
           <h2 className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-soft mb-3">
             Example
           </h2>
@@ -34,7 +33,6 @@ export default function HowToPlay() {
             <Infographic />
           </div>
 
-          {/* Rules */}
           <h2 className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-soft mb-3">
             Rules
           </h2>
@@ -63,7 +61,6 @@ export default function HowToPlay() {
             </div>
           </div>
 
-          {/* Fair play */}
           <h2 className="font-mono text-[11px] tracking-[0.16em] uppercase text-accent-soft mb-3">
             Fair play
           </h2>
@@ -73,7 +70,6 @@ export default function HowToPlay() {
             </p>
           </div>
 
-          {/* Start */}
           <div className="panel p-6 flex items-center gap-4 flex-wrap glow-purple">
             <FlowerMark size={20} />
             <div className="flex-1 min-w-[200px]">
@@ -96,7 +92,6 @@ export default function HowToPlay() {
 function Infographic() {
   return (
     <div className="flex flex-col gap-4">
-      {/* Secret code */}
       <Row label="Code">
         <div className="flex gap-2">
           {[0, 1, 2, 3].map((i) => (
@@ -121,7 +116,6 @@ function Infographic() {
 
       <div className="hairline-t" />
 
-      {/* Guess + result */}
       <Row label="Guess">
         <div className="flex gap-2">
           <ColorSymbol index={0} size={36} />

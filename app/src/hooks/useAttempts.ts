@@ -21,10 +21,6 @@ export function useAttempts(date: number, player: PublicKey | null) {
       setAttempts([]);
       return;
     }
-    // Filter at the RPC level by dataSize so legacy 68-byte PDAs (pre
-    // guess_symbols upgrade) never reach the decoder. New layout is 72 bytes:
-    // 8 disc + 1 bump + 32 player + 4 date + 4 idx + 8 offset + 1 exact +
-    // 1 misplaced + 1 finalized + 8 submitted_at + 4 guess_symbols.
     const NEW_LAYOUT_SIZE = 72;
     let all: Awaited<ReturnType<typeof program.account.playerAttempt.all>> = [];
     try {

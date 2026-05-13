@@ -1,12 +1,3 @@
-/**
- * Initialize the three computation definitions (gen_code, evaluate_guess,
- * reveal_code). Idempotent: skips steps already on-chain.
- *
- * Usage:
- *   ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
- *   ANCHOR_WALLET=$HOME/.config/solana/id.json \
- *   npx tsx migrations/init-comp-defs.ts
- */
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { PublicKey, AddressLookupTableProgram } from "@solana/web3.js";
@@ -92,7 +83,6 @@ async function sleep(ms: number) {
     const rawCircuit = fs.readFileSync(`build/${c.name}.arcis`);
     console.log(`  step 2 upload (${rawCircuit.length} bytes)...`);
     try {
-      // chunkSize=4 keeps inner concurrent txs to ~4 to stay under RPC burst limits
       await uploadCircuit(provider, c.name, program.programId, rawCircuit, true, 4);
       console.log(`  uploaded`);
     } catch (e) {
@@ -128,7 +118,6 @@ async function sleep(ms: number) {
     }
 
     console.log("");
-    // pause between accounts to avoid RPC burst rate limits
     await sleep(2000);
   }
 

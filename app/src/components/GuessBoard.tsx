@@ -41,7 +41,6 @@ export function GuessBoard({
     );
   });
 
-  // active row (the one being composed or computing)
   const activeIdx = attempts.length;
   if (activeIdx < maxRows) {
     rows.push(
@@ -58,7 +57,6 @@ export function GuessBoard({
     );
   }
 
-  // empty placeholder rows
   for (let i = activeIdx + 1; i < maxRows; i++) {
     rows.push(
       <GuessRow
@@ -70,5 +68,5 @@ export function GuessBoard({
     );
   }
 
-  return <div>{rows}</div>;
+  return <div className="overflow-hidden">{rows}</div>;
 }

@@ -8,9 +8,6 @@ import {
 
 let cachedMXEPublicKey: Uint8Array | null = null;
 
-// Snapshot from `arcium mxe-info EG3AAsGKNCR8x6dLYu5KjrhdegxgQEQJD3R1NWf1FQk4`.
-// Used as a fallback when getMXEPublicKey() fails to deserialize the on-chain
-// MXE account (older account format vs newer client deserializer).
 const MXE_X25519_PUBKEY_FALLBACK = new Uint8Array([
   239, 182, 83, 118, 82, 182, 72, 171, 201, 63, 145, 2, 222, 205, 35, 9,
   135, 216, 41, 158, 122, 71, 198, 246, 134, 164, 2, 229, 253, 164, 190, 12,
@@ -30,9 +27,7 @@ export async function fetchMXEPublicKey(
         cachedMXEPublicKey = k;
         return k;
       }
-    } catch {
-      // Snapshot fallback handles this. Don't surface to the console.
-    }
+    } catch {}
     if (attempt < retries) await new Promise((r) => setTimeout(r, retryDelayMs));
   }
   cachedMXEPublicKey = MXE_X25519_PUBKEY_FALLBACK;
@@ -46,7 +41,6 @@ export interface EncryptedGuess {
   nonce: Uint8Array;
 }
 
-// Each u8 is encrypted as a separate ciphertext to match the Arcis circuit input.
 export function encryptGuess(
   symbols: number[],
   mxePublicKey: Uint8Array,

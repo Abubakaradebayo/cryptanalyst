@@ -109,11 +109,6 @@ export function useGameActions(date: number) {
         })
         .rpc({ skipPreflight: false, commitment: "confirmed" });
 
-      // Read the actual on-chain attempt_idx the program stored. It's set to
-      // puzzle.attempt_count at submit time, which can race with our local
-      // read. Trusting the chain here removes the entire class of "saved
-      // localMem at the wrong key" bugs. Best-effort: fall back to nextAttemptIdx
-      // if the read fails (rare — the tx just confirmed).
       let onChainAttemptIdx = nextAttemptIdx;
       try {
         const acc = await program.account.playerAttempt.fetch(attemptPda);
@@ -162,8 +157,6 @@ export function useGameActions(date: number) {
   return { initPuzzle, submitGuess, claimSolve, pending, error };
 }
 
-// Errors we deliberately don't dump to console.error: wallet rejections (the
-// user chose to cancel) and duplicate-tx retries (the original landed).
 function isBenignError(e: unknown): boolean {
   if (typeof e !== "object" || e === null) return false;
   const err = e as {
@@ -204,17 +197,10 @@ function humanizeError(e: unknown): string {
     transactionLogs?: string[];
   };
 
-  // Solana RPC re-sends the same signed tx as a retry while waiting for
-  // confirmation. Once the original lands, the retry is rejected with this
-  // message. Returning empty string suppresses it from the UI.
   if (/already.*been.*processed|already.*processed/i.test(err.message ?? "")) {
     return "";
   }
 
-  // SystemProgram::AccountAlreadyInUse surfaces as "custom program error: 0x0"
-  // when init-ing a PDA whose address was already taken. In our flow this
-  // means the previous callback hasn't finalized yet so the next attempt PDA
-  // collides. Tell the user to wait, don't show the raw hex.
   const allLogs = (err.logs ?? err.transactionLogs ?? []).join(" ");
   if (
     /custom program error: 0x0/i.test(err.message ?? "") ||
@@ -223,7 +209,6 @@ function humanizeError(e: unknown): string {
     return "Previous guess is still being computed by the cluster. Wait for the feedback row to land, then submit again.";
   }
 
-  // Wallet-adapter rejections
   const code = err.code ?? err.error?.code;
   if (
     code === 4001 ||
@@ -234,17 +219,14 @@ function humanizeError(e: unknown): string {
     return "Wallet rejected the transaction. Approve in Phantom and try again.";
   }
 
-  // Insufficient funds
   if (/insufficient.*lamports|insufficient.*funds/i.test(err.message ?? "")) {
     return "Wallet doesn't have enough devnet SOL. Top up the connected Phantom wallet.";
   }
 
-  // RPC rate limit
   if (/429|too many requests/i.test(err.message ?? "")) {
     return "RPC is rate-limiting. Wait ~30s and try again.";
   }
 
-  // Anchor / Arcium program errors, pull from logs if present
   const logs = err.logs ?? err.transactionLogs ?? [];
   const anchorLog = logs.find((l) => l.includes("AnchorError"));
   if (anchorLog) {
@@ -253,12 +235,10 @@ function humanizeError(e: unknown): string {
     return anchorLog.replace(/^Program log:\s*/, "").trim();
   }
 
-  // SendTransactionError simulation failures
   if (/simulation failed/i.test(err.message ?? "")) {
     return `Simulation failed. ${err.message}`.slice(0, 240);
   }
 
-  // Generic fallback: at least show name + truncated message
   const msg = err.message ?? JSON.stringify(err).slice(0, 200);
   if (!msg || msg === "undefined" || /unknown action/i.test(msg)) {
     return "Transaction failed (no details surfaced). Check Phantom and the browser console for specifics.";

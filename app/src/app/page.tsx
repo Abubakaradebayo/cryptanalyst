@@ -9,7 +9,7 @@ import { ColorPicker } from "@/components/ColorPicker";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { currentPuzzleDate } from "@/lib/dates";
-import { NUM_POSITIONS, SYMBOL_PALETTE } from "@/lib/constants";
+import { NUM_POSITIONS } from "@/lib/constants";
 import { usePuzzle } from "@/hooks/usePuzzle";
 import { useAttempts } from "@/hooks/useAttempts";
 import { useGameActions } from "@/hooks/useGameActions";
@@ -41,7 +41,6 @@ function loadLocalGuesses(date: number, owner: string): LocalMemory {
     return {};
   }
 }
-// Read-modify-write so concurrent React state can't overwrite saved entries.
 function persistOneGuess(
   date: number,
   owner: string,
@@ -93,9 +92,6 @@ export default function Page() {
     loggedFinalizedRef.current = new Set();
   }, [date, ownerKey]);
 
-  // Re-merge from localStorage on every attempts update. This guards against
-  // any React state drift (HMR, accidental overwrites) while keeping the
-  // canonical source of truth in localStorage.
   useEffect(() => {
     const fromDisk = loadLocalGuesses(date, ownerKey);
     setLocalMem((prev) => ({ ...prev, ...fromDisk }));
@@ -131,7 +127,6 @@ export default function Page() {
     if (!error) lastErrorRef.current = null;
   }, [error]);
 
-  // Auto-claim when last attempt is (4,0) and puzzle still Active.
   useEffect(() => {
     const last = attempts[attempts.length - 1];
     if (
@@ -159,9 +154,6 @@ export default function Page() {
   }, [attempts.length]);
 
   const boardAttempts: BoardAttempt[] = attempts.map((a) => ({
-    // On-chain guessSymbols is the source of truth for the post-upgrade
-    // program. localMem is the warm cache for the in-flight render before
-    // the next chain refetch lands. Either way, fall back to ? placeholders.
     symbols:
       a.guessSymbols ??
       localMem[a.attemptIdx] ??
@@ -179,7 +171,6 @@ export default function Page() {
     if (activeSlot < NUM_POSITIONS - 1) setActiveSlot(activeSlot + 1);
   }
 
-  // If the puzzle has been stuck in Generating for >2 min, allow retry.
   const generatingStuck =
     puzzle.state === "Generating" &&
     puzzle.createdAt > 0 &&
@@ -205,16 +196,12 @@ export default function Page() {
     ) {
       const symbols = pendingSymbols.map((s) => s as number);
       const pdaIdx = puzzle.attemptCount;
-      // Save BEFORE submit. If .rpc() throws after the tx actually lands
-      // (Solana RPCs do retry-and-reject on duplicate signatures), we still
-      // have localMem populated under the expected key.
       persistOneGuess(date, ownerKey, pdaIdx, symbols);
       setLocalMem((prev) => ({ ...prev, [pdaIdx]: symbols }));
       setComputingTx(true);
       const result = await submitGuess(symbols, pdaIdx);
       if (result) {
         const { sig, onChainAttemptIdx } = result;
-        // If the program stored a different idx (rare race), also save there.
         if (onChainAttemptIdx !== pdaIdx) {
           persistOneGuess(date, ownerKey, onChainAttemptIdx, symbols);
           setLocalMem((prev) => ({ ...prev, [onChainAttemptIdx]: symbols }));
@@ -244,9 +231,6 @@ export default function Page() {
       return acc;
     }, null);
 
-  // Block submit while the previous attempt is mid-callback. Otherwise
-  // puzzle.attemptCount hasn't incremented yet and the next submit would
-  // re-use the same PDA seed, triggering AccountAlreadyInUse (0x0).
   const lastAttempt = attempts[attempts.length - 1];
   const waitingForCallback = !!lastAttempt && !lastAttempt.finalized;
 
@@ -277,12 +261,70 @@ export default function Page() {
                     ? "Computing in MPC…"
                     : "Submit guess";
 
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
+      if (event.key >= "1" && event.key <= "6") {
+        if (puzzle.state !== "Active" || computingTx || pending !== "none") return;
+        event.preventDefault();
+        const symbol = Number(event.key) - 1;
+        setPendingSymbols((prev) => {
+          const next = [...prev];
+          next[activeSlot] = symbol;
+          return next;
+        });
+        setActiveSlot((slot) => Math.min(NUM_POSITIONS - 1, slot + 1));
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveSlot((slot) =>
+          event.key === "ArrowLeft"
+            ? Math.max(0, slot - 1)
+            : Math.min(NUM_POSITIONS - 1, slot + 1),
+        );
+        return;
+      }
+
+      if (event.key === "Backspace") {
+        if (computingTx || pending !== "none") return;
+        event.preventDefault();
+        setPendingSymbols((prev) => {
+          const next = [...prev];
+          const slot =
+            next[activeSlot] === null ? Math.max(0, activeSlot - 1) : activeSlot;
+          next[slot] = null;
+          setActiveSlot(slot);
+          return next;
+        });
+        return;
+      }
+
+      if (event.key === "Enter" && !primaryDisabled) {
+        event.preventDefault();
+        void onPrimary();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeSlot, computingTx, onPrimary, pending, primaryDisabled, puzzle.state]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 page-fade">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-12 grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
+      <main className="flex-1 page-fade game-shell">
+        <div className="game-stage max-w-[1280px] mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-12 grid grid-cols-1 lg:grid-cols-[430px_minmax(0,1fr)] gap-5 lg:gap-6 items-start">
           <PuzzleCard
             date={date}
             state={puzzle.state}
@@ -297,9 +339,9 @@ export default function Page() {
             primaryLabel={primaryLabel}
           />
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {publicKey && wins.totalSolves > 0 ? (
-              <div className="panel p-4 flex items-center gap-4 flex-wrap">
+              <div className="control-strip p-3 sm:p-4 flex items-center gap-4 flex-wrap">
                 {wins.streak > 0 ? (
                   <div className="flex items-center gap-2">
                     <span
@@ -307,8 +349,7 @@ export default function Page() {
                       style={{
                         width: 22,
                         height: 22,
-                        borderRadius: "50%",
-                        background: "rgba(167,139,250,0.16)",
+                        background: "rgba(167,139,250,0.14)",
                         border: "1px solid var(--line-accent)",
                         color: "var(--accent)",
                         fontSize: 12,
@@ -335,24 +376,18 @@ export default function Page() {
                 </a>
               </div>
             ) : null}
-            <Section tag="#0.1" label="Objective" meta="onchain · solana">
-              <p className="text-[14px] text-text-mute leading-relaxed">
-                Guess the 4-color code in {MAX_ATTEMPTS} tries. You get hints
-                after each guess.
-              </p>
-            </Section>
 
             <Section
-              tag="#0.2"
-              label="Guesses"
-              meta={`${attempts.length} / ${MAX_ATTEMPTS}`}
+              tag="play"
+              label="Code board"
+              meta={`${attempts.length} / ${MAX_ATTEMPTS} guesses`}
             >
               {attempts.length === 0 && puzzle.state === "Active" ? (
-                <p className="text-[12.5px] text-text-mute mb-3">
-                  Pick 4 colors below, then submit your first guess.
+                <p className="text-[13px] text-text-mute mb-3">
+                  Pick four symbols, submit, then wait for the MPC cluster to return your clues.
                 </p>
               ) : null}
-              <div className="panel">
+              <div className="board-panel overflow-hidden">
                 <GuessBoard
                   attempts={boardAttempts}
                   pendingSymbols={pendingSymbols}
@@ -362,8 +397,13 @@ export default function Page() {
                   maxRows={MAX_ATTEMPTS}
                 />
               </div>
-              <div className="mt-4 panel p-4 flex items-center gap-4 flex-wrap">
-                <span className="section-tag">Colors</span>
+              <div className="mt-4 control-strip p-4 flex items-center gap-4 flex-wrap">
+                <div className="flex flex-col gap-1 mr-1">
+                  <span className="section-tag">Symbols</span>
+                  <span className="font-mono text-[10.5px] tracking-[0.12em] uppercase text-text-dim">
+                    slot {activeSlot + 1} selected
+                  </span>
+                </div>
                 <ColorPicker
                   selectedIndex={pendingSymbols[activeSlot] ?? null}
                   onSelect={chooseSymbol}
@@ -384,61 +424,28 @@ export default function Page() {
                   }}
                   disabled={computingTx || pending !== "none"}
                 >
-                  Clear
+                  Clear row
                 </button>
               </div>
             </Section>
 
-            <Section tag="#0.3" label="Why this is fair" meta="no cheating">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <PrivacyCard
-                  title="The answer is hidden"
-                  body="Nobody can see today's code. Not the developers, not anyone. It stays hidden until someone solves it."
-                />
-                <PrivacyCard
-                  title="Your guesses stay private"
-                  body="Other players can't see what colors you picked. Only your score is public."
-                />
-                <PrivacyCard
-                  title="You only see the score"
-                  body="After each guess, you get hints, not the answer. The full code is revealed only when someone cracks it."
-                />
-              </div>
-            </Section>
-
-            <Section tag="#0.4" label="Available colors" meta="pick from these">
-              <div className="panel p-4 flex flex-wrap gap-3 items-center">
-                {SYMBOL_PALETTE.map((p, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span
-                      style={{
-                        width: 14,
-                        height: 14,
-                        background: p.hex,
-                        display: "inline-block",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                      }}
-                    />
-                    <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-mute">
-                      {String(i).padStart(2, "0")} · {p.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Section>
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+              <ClueLegend />
+              <ProofStrip />
+            </div>
 
             <Section
-              tag="#0.5"
-              label="Activity"
-              meta={log.length > 0 ? `${log.length} event${log.length === 1 ? "" : "s"}` : "live · devnet"}
+              tag="chain"
+              label="Chain log"
+              meta={log.length > 0 ? `${log.length} event${log.length === 1 ? "" : "s"}` : "devnet"}
             >
-              <div className="panel p-0 overflow-hidden">
+              <div className="board-panel p-0 overflow-hidden">
                 {log.length === 0 ? (
                   <div className="p-4 font-mono text-[11px] tracking-[0.16em] uppercase text-text-dim">
-                    Be the first to submit a guess.
+                    No moves submitted yet.
                   </div>
                 ) : (
-                  <div className="max-h-[360px] overflow-y-auto">
+                  <div className="max-h-[280px] overflow-y-auto">
                     <ul className="divide-y divide-[var(--line)]">
                       {log.map((entry, idx) => (
                         <LogRow key={`${entry.ts}-${idx}`} entry={entry} />
@@ -450,7 +457,7 @@ export default function Page() {
             </Section>
 
             {error ? (
-              <div className="panel p-4">
+              <div className="control-strip p-4">
                 <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-rose mb-2">
                   Error
                 </div>
@@ -461,7 +468,7 @@ export default function Page() {
             ) : null}
 
             {puzzle.state === "Solved" ? (
-              <div className="panel p-5 flex items-center gap-4 glow-purple flex-wrap">
+              <div className="board-panel p-5 flex items-center gap-4 flex-wrap">
                 <StatusBadge variant="solved">Cracked</StatusBadge>
                 <div className="flex-1 min-w-[200px]">
                   <div className="text-[14px] mb-1">
@@ -534,14 +541,54 @@ function Section({
   );
 }
 
-function PrivacyCard({ title, body }: { title: string; body: string }) {
+function ClueLegend() {
   return (
-    <div className="panel p-4">
-      <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent-soft mb-2">
-        {title}
+    <section>
+      <SectionHeader tag="clues" label="How to read" meta="Mastermind" />
+      <div className="control-strip p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <ClueItem className="peg-exact" label="Exact" body="right symbol, right slot" />
+        <ClueItem className="peg-misplaced" label="Misplaced" body="right symbol, wrong slot" />
       </div>
-      <p className="text-[12.5px] text-text-mute leading-relaxed">{body}</p>
+    </section>
+  );
+}
+
+function ClueItem({
+  className,
+  label,
+  body,
+}: {
+  className: string;
+  label: string;
+  body: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className={className} style={{ width: 10, height: 10, borderRadius: "50%" }} />
+      <div>
+        <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text">
+          {label}
+        </div>
+        <div className="text-[12px] text-text-dim leading-relaxed">{body}</div>
+      </div>
     </div>
+  );
+}
+
+function ProofStrip() {
+  return (
+    <section>
+      <SectionHeader tag="proof" label="Why fair" meta="MPC" />
+      <div className="control-strip p-4">
+        <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-accent-soft mb-2">
+          The answer never leaves encrypted state
+        </div>
+        <p className="text-[12.5px] text-text-mute leading-relaxed">
+          Arcium computes the clues over encrypted values. Only the clue counts
+          are public until the cipher is cracked.
+        </p>
+      </div>
+    </section>
   );
 }
 

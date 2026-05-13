@@ -233,7 +233,7 @@ End-to-end test suite at [`tests/cryptanalyst.ts`](tests/cryptanalyst.ts) covers
 anchor test
 ```
 
-> **Known limitation:** the test runs against `arcium localnet` which requires the 0.9.x callback-server Docker image. Arcium has not yet published this image, so localnet runs are temporarily blocked. The same flows are validated end-to-end against devnet cluster `456` — see the **Notable transactions** table above for verifiable on-chain evidence.
+> **Known limitation:** the test runs against `arcium localnet` which requires the 0.9.x callback-server Docker image. Arcium has not yet published this image, so localnet runs are temporarily blocked. The same flows are validated end-to-end against devnet cluster `456` - see the **Notable transactions** table above for verifiable on-chain evidence.
 
 ---
 
@@ -270,15 +270,15 @@ The code is stored on chain as `[[u8; 32]; 4]` ciphertext + `state_nonce: u128`,
 
 ### Next 2-4 weeks (post-judging, before mainnet)
 
-- **NFT trophies on solve** — Metaplex-compressed cNFT minted automatically on `claim_solve`. Image generated dynamically from the date + the colors. Cheap (~0.001 SOL per mint) and shows up in Phantom's collectibles tab.
-- **Difficulty tiers** — `Easy` (5 colors), `Standard` (6 colors), `Hard` (8 colors). Same MPC infrastructure, more replay value.
-- **Streak NFTs** — solving 7 days in a row mints a "Cryptanalyst Adept" NFT. 30-day streak mints a different one. Drives daily retention.
+- **NFT trophies on solve** - Metaplex-compressed cNFT minted automatically on `claim_solve`. Image generated dynamically from the date + the colors. Cheap (~0.001 SOL per mint) and shows up in Phantom's collectibles tab.
+- **Difficulty tiers** - `Easy` (5 colors), `Standard` (6 colors), `Hard` (8 colors). Same MPC infrastructure, more replay value.
+- **Streak NFTs** - solving 7 days in a row mints a "Cryptanalyst Adept" NFT. 30-day streak mints a different one. Drives daily retention.
 
 ### 1-3 months (mainnet candidates)
 
-- **PvP racing mode** — two wallets enter the same encrypted code at the same time, race to crack it. Cluster computes both players' guesses in parallel. Winner takes the pot.
-- **Coop puzzle** — 4 wallets must collectively crack a harder code, each holding partial info. Demonstrates a more advanced MPC pattern (multi-party encrypted aggregation) and creates social play.
-- **Leaderboard rewards** — small SOL prize pool funded by tx fees, distributed weekly to the top 10 by guesses + speed.
+- **PvP racing mode** - two wallets enter the same encrypted code at the same time, race to crack it. Cluster computes both players' guesses in parallel. Winner takes the pot.
+- **Coop puzzle** - 4 wallets must collectively crack a harder code, each holding partial info. Demonstrates a more advanced MPC pattern (multi-party encrypted aggregation) and creates social play.
+- **Leaderboard rewards** - small SOL prize pool funded by tx fees, distributed weekly to the top 10 by guesses + speed.
 
 ### Mainnet considerations
 

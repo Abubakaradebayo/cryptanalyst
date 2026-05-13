@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Inter } from "next/font/google";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
 import { WelcomeModal } from "@/components/WelcomeModal";
 
-const inter = Inter({
+const spaceMono = Space_Mono({
   subsets: ["latin"],
-  variable: "--font-sans-loaded",
-  weight: ["400", "500", "600"],
-});
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono-loaded",
-  weight: ["400", "500"],
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={spaceMono.variable}>
       <body className="min-h-screen">
         <WalletProvider>
           {children}
