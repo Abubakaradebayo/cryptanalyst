@@ -9,7 +9,7 @@ import { ColorPicker } from "@/components/ColorPicker";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StatusBadge } from "@/components/StatusBadge";
 import { currentPuzzleDate } from "@/lib/dates";
-import { NUM_POSITIONS } from "@/lib/constants";
+import { NUM_POSITIONS, SYMBOL_PALETTE } from "@/lib/constants";
 import { usePuzzle } from "@/hooks/usePuzzle";
 import { useAttempts } from "@/hooks/useAttempts";
 import { useGameActions } from "@/hooks/useGameActions";
@@ -433,6 +433,27 @@ export default function Page() {
               <ClueLegend />
               <ProofStrip />
             </div>
+
+            <Section tag="palette" label="Available colors" meta="pick from these">
+              <div className="board-panel p-4 flex flex-wrap gap-3 items-center">
+                {SYMBOL_PALETTE.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span
+                      style={{
+                        width: 14,
+                        height: 14,
+                        background: p.hex,
+                        display: "inline-block",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                      }}
+                    />
+                    <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-text-mute">
+                      {String(i).padStart(2, "0")} · {p.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Section>
 
             <Section
               tag="chain"
