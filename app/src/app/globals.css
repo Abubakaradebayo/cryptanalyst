@@ -53,6 +53,11 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -63,6 +68,312 @@ body::before {
     linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.06) 76%);
+}
+
+.crypto-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(167, 139, 250, 0.09), transparent 34rem),
+    radial-gradient(circle at 18% 78%, rgba(216, 204, 255, 0.055), transparent 24rem),
+    radial-gradient(circle at 88% 64%, rgba(167, 139, 250, 0.05), transparent 28rem);
+}
+
+.crypto-bg__glow {
+  position: absolute;
+  width: min(58vw, 720px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(34px);
+  opacity: 0.5;
+  will-change: transform, opacity;
+}
+
+.crypto-bg__glow--violet {
+  left: 8%;
+  top: 4%;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.22), transparent 66%);
+  animation: crypto-glow-drift 18s ease-in-out infinite;
+}
+
+.crypto-bg__glow--soft {
+  right: -12%;
+  bottom: 2%;
+  background: radial-gradient(circle, rgba(216, 204, 255, 0.13), transparent 68%);
+  animation: crypto-glow-drift-alt 22s ease-in-out infinite;
+}
+
+.crypto-bg__grid,
+.crypto-bg__matrix {
+  position: absolute;
+  inset: 0;
+}
+
+.crypto-bg__grid {
+  opacity: 0.5;
+  background-image:
+    linear-gradient(rgba(167, 139, 250, 0.065) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(216, 204, 255, 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.8), transparent 72%);
+  animation: crypto-grid-shift 24s linear infinite;
+  will-change: background-position;
+}
+
+.crypto-bg__scan {
+  position: absolute;
+  inset: -20% -10%;
+  opacity: 0.28;
+  background:
+    linear-gradient(
+      105deg,
+      transparent 0 40%,
+      rgba(216, 204, 255, 0.08) 44%,
+      rgba(167, 139, 250, 0.12) 45%,
+      transparent 50% 100%
+    );
+  transform: translate3d(-30%, 0, 0);
+  animation: crypto-scan-sweep 13s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.crypto-bg__scan--two {
+  opacity: 0.18;
+  animation-duration: 18s;
+  animation-delay: -7s;
+  transform: translate3d(30%, 0, 0) scaleX(-1);
+}
+
+.crypto-bg__matrix {
+  opacity: 0.22;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 38px,
+      rgba(216, 204, 255, 0.11) 39px,
+      transparent 40px 96px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 18px,
+      rgba(167, 139, 250, 0.055) 19px,
+      transparent 20px 120px
+    );
+  animation: crypto-matrix-fall 30s linear infinite;
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 76%, transparent);
+  will-change: background-position;
+}
+
+.crypto-bg__circuit {
+  position: absolute;
+  inset: 0;
+  opacity: 0.82;
+  background-image:
+    linear-gradient(90deg, transparent 0 14%, rgba(167, 139, 250, 0.12) 14.2%, transparent 14.6% 100%),
+    linear-gradient(90deg, transparent 0 35%, rgba(216, 204, 255, 0.075) 35.2%, transparent 35.7% 100%),
+    linear-gradient(90deg, transparent 0 62%, rgba(167, 139, 250, 0.085) 62.2%, transparent 62.6% 100%),
+    linear-gradient(0deg, transparent 0 23%, rgba(216, 204, 255, 0.08) 23.2%, transparent 23.55% 100%),
+    linear-gradient(0deg, transparent 0 58%, rgba(167, 139, 250, 0.06) 58.2%, transparent 58.55% 100%),
+    linear-gradient(0deg, transparent 0 78%, rgba(167, 139, 250, 0.07) 78.2%, transparent 78.55% 100%);
+  mask-image: radial-gradient(circle at 54% 42%, rgba(0, 0, 0, 0.86), transparent 78%);
+}
+
+.crypto-bg__circuit span {
+  position: absolute;
+  left: -7rem;
+  top: var(--y);
+  width: 7rem;
+  height: 1px;
+  transform: translate3d(0, 0, 0);
+  animation: crypto-packet-run 9s linear infinite;
+  animation-delay: calc(var(--i) * -0.78s);
+  will-change: transform, opacity;
+}
+
+.crypto-bg__circuit span:nth-child(2n) {
+  top: var(--y-alt);
+  animation-duration: 12s;
+}
+
+.crypto-bg__circuit span:nth-child(3n) {
+  transform: rotate(-14deg);
+  animation-name: crypto-packet-run-diagonal;
+  animation-duration: 14s;
+}
+
+.crypto-bg__circuit i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(216, 204, 255, 0.22), rgba(167, 139, 250, 0.72), transparent);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.35);
+}
+
+.crypto-bg__rings {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: min(72vw, 760px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0.42;
+  background:
+    radial-gradient(circle, transparent 0 30%, rgba(167, 139, 250, 0.13) 30.4%, transparent 31%),
+    radial-gradient(circle, transparent 0 47%, rgba(216, 204, 255, 0.085) 47.3%, transparent 47.9%),
+    radial-gradient(circle, transparent 0 63%, rgba(167, 139, 250, 0.07) 63.2%, transparent 63.8%);
+  animation: crypto-rings-pulse 7s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.crypto-bg__nodes {
+  position: absolute;
+  inset: 10% 4% 8%;
+  width: 92%;
+  height: 82%;
+  opacity: 0.42;
+  color: rgba(167, 139, 250, 0.35);
+  animation: crypto-nodes-breathe 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.crypto-bg__nodes polyline {
+  stroke: currentColor;
+  stroke-width: 0.24;
+  stroke-dasharray: 2.2 2.8;
+}
+
+.crypto-bg__node-path {
+  stroke: rgba(216, 204, 255, 0.3);
+  stroke-width: 0.28;
+  stroke-dasharray: 0.04 0.12;
+  animation: crypto-node-flow 5.5s linear infinite;
+}
+
+.crypto-bg__node-path--fast {
+  stroke: rgba(216, 204, 255, 0.26);
+  animation-duration: 3.8s;
+  animation-direction: reverse;
+}
+
+.crypto-bg__node-path--slow {
+  stroke: rgba(167, 139, 250, 0.3);
+}
+
+.crypto-bg__nodes circle {
+  fill: rgba(167, 139, 250, 0.52);
+  filter: drop-shadow(0 0 4px rgba(167, 139, 250, 0.5));
+}
+
+@keyframes crypto-glow-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.44; }
+  50% { transform: translate3d(8%, 5%, 0) scale(1.08); opacity: 0.62; }
+}
+
+@keyframes crypto-glow-drift-alt {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.36; }
+  50% { transform: translate3d(-7%, -6%, 0) scale(1.06); opacity: 0.55; }
+}
+
+@keyframes crypto-grid-shift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 72px 72px, 72px 72px; }
+}
+
+@keyframes crypto-matrix-fall {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 160px, 0 240px; }
+}
+
+@keyframes crypto-scan-sweep {
+  0% { transform: translate3d(-42%, 0, 0); opacity: 0; }
+  12% { opacity: 0.24; }
+  42% { opacity: 0.1; }
+  70%, 100% { transform: translate3d(42%, 0, 0); opacity: 0; }
+}
+
+@keyframes crypto-packet-run {
+  0% { transform: translate3d(-10vw, 0, 0); opacity: 0; }
+  10% { opacity: 0.34; }
+  45% { opacity: 0.66; }
+  88% { opacity: 0.16; }
+  100% { transform: translate3d(116vw, 0, 0); opacity: 0; }
+}
+
+@keyframes crypto-packet-run-diagonal {
+  0% { transform: translate3d(-12vw, 8vh, 0) rotate(-14deg); opacity: 0; }
+  12% { opacity: 0.42; }
+  54% { opacity: 0.62; }
+  100% { transform: translate3d(116vw, -16vh, 0) rotate(-14deg); opacity: 0; }
+}
+
+@keyframes crypto-node-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -1; }
+}
+
+@keyframes crypto-rings-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.28; }
+  50% { transform: translate(-50%, -50%) scale(1.04); opacity: 0.48; }
+}
+
+@keyframes crypto-nodes-breathe {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.26; }
+  50% { transform: translate3d(0, -8px, 0) scale(1.012); opacity: 0.5; }
+}
+
+@media (max-width: 640px) {
+  .crypto-bg {
+    background:
+      radial-gradient(circle at 48% 22%, rgba(167, 139, 250, 0.08), transparent 22rem),
+      radial-gradient(circle at 20% 82%, rgba(216, 204, 255, 0.045), transparent 18rem);
+  }
+
+  .crypto-bg__grid {
+    background-size: 58px 58px;
+    opacity: 0.34;
+  }
+
+  .crypto-bg__matrix {
+    opacity: 0.14;
+  }
+
+  .crypto-bg__rings {
+    width: 92vw;
+    top: 36%;
+  }
+
+  .crypto-bg__nodes {
+    inset: 12% -24% 18%;
+    width: 124%;
+    opacity: 0.26;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crypto-bg *,
+  .computing,
+  .loading-flower-pulse .loading-flower-svg,
+  .loading-flower-spin,
+  .page-fade,
+  .welcome-fade,
+  .shimmer {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+
+  .crypto-bg__glow,
+  .crypto-bg__grid,
+  .crypto-bg__matrix,
+  .crypto-bg__rings,
+  .crypto-bg__nodes {
+    will-change: auto;
+  }
 }
 
 /* Subtle vignette + faint grid only inside .dotted-bg containers, not globally */
@@ -76,15 +387,17 @@ body::before {
 .font-mono { font-family: var(--font-mono); }
 
 .panel {
-  background: var(--panel);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
   border: 1px solid var(--line);
   box-shadow: none;
   border-radius: 0;
+  backdrop-filter: blur(14px);
 }
 .panel-2 {
-  background: var(--panel-2);
+  background: color-mix(in srgb, var(--panel-2) 88%, transparent);
   border: 1px solid var(--line);
   border-radius: 0;
+  backdrop-filter: blur(12px);
 }
 .game-shell {
   position: relative;
@@ -102,18 +415,20 @@ body::before {
   min-height: calc(100vh - 82px);
 }
 .board-panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
+  background: linear-gradient(180deg, rgba(17, 17, 18, 0.92), rgba(7, 7, 8, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.035);
   border-radius: 0;
+  backdrop-filter: blur(16px);
 }
 .control-strip {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: rgba(10, 10, 10, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.095);
   border-radius: 0;
+  backdrop-filter: blur(14px);
 }
 .site-header {
-  background: rgba(0, 0, 0, 0.86);
+  background: rgba(0, 0, 0, 0.74);
 }
 
 /* Arcium-style filled button: white-ish on accent or stark white-on-black */

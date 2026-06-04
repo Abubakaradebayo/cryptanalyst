@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
 import { WelcomeModal } from "@/components/WelcomeModal";
+import { CryptoBackground } from "@/components/CryptoBackground";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -54,10 +55,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={spaceMono.variable}>
       <body className="min-h-screen">
-        <WalletProvider>
-          {children}
-          <WelcomeModal />
-        </WalletProvider>
+        <CryptoBackground />
+        <div className="relative z-10 min-h-screen">
+          <WalletProvider>
+            {children}
+            <WelcomeModal />
+          </WalletProvider>
+        </div>
         <Analytics />
       </body>
     </html>
